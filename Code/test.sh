@@ -2,6 +2,7 @@
 
 clear
 
+# Comment ???
 # Clean and make the new File
 make clean
 make
@@ -17,5 +18,5 @@ rm ../sf/PDGwB/*
 files=`ls`
 for eachFile in $files
 do
- cp $eachFile ../sf/PDGwB/
+ cp $eachFile ../sf/PDGwB/Code
 done
