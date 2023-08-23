@@ -5,8 +5,7 @@ using namespace std;
 extern "C"
 void ga(double *warray) {
 
-    warray[0] = -1;
-	warray[1] = 128;
+    warray[0] = 64;
     cout << "Testing HERE" << endl;
 }
 
