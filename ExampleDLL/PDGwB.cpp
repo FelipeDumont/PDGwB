@@ -1,4 +1,4 @@
-#include "AStar.h"
+#include "PDGwB.h"
 
 #include <string>
 #include <pthread.h>
@@ -15,7 +15,7 @@ using namespace std;
 extern "C"{
 
 	int EXPORT SimpleTypeReturnFun(){
-		return 10;
+		return 153;
 	}
 
 	int EXPORT SimpleTypeArgFun(int n){

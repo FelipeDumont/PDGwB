@@ -1,5 +1,5 @@
 @echo off
-gcc -c Astar.cpp 
-gcc -shared -o Astar.dll Astar.o
+gcc -c PDGwB.cpp 
+gcc -shared -o PDGwB.dll PDGwB.o
 echo AStart.dll  created ! ! !
 pause
