@@ -15,7 +15,12 @@ mkdir "$directory"
 # Executable file and then
 # .so Compilation (shared library)
 g++ -fPIC -O3 -o PDGwB Main.cpp 
-g++ -fPIC -O3 -shared -o test.so Main.cpp 
+g++ -fPIC -O3 -shared -o PDGwB.dll Main.cpp 
+
+
+# Test for the dll ...
+g++ -fPIC -shared -o TestDLL.so TestDLL.cpp 
+g++ -fPIC -shared -o TestDLL.dll TestDLL.cpp
 
 
 # Move the current version to the Git location

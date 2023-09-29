@@ -1,8 +1,9 @@
-#include <iostream>
+// #include <iostream>
 #include <random>
 #include <algorithm>
 #include <string.h>
 #include <cmath> //absolute (abs())
+
 using namespace std;
 
 class Individual {
@@ -56,21 +57,26 @@ public:
 	
 	int iRoom;
 	int eRoom;
+	int roomDistance;
 	int maxNumber;
 	mt19937 randGen;
+	int finalRoomX;
+	int finalRoomY;
 	
 	// Assigned
 	uniform_real_distribution<double> prob = uniform_real_distribution<>(0.0, 1.0);
-	uniform_int_distribution<int> sides = uniform_int_distribution<>(0, 3);
+	uniform_int_distribution<int> Sides2 = uniform_int_distribution<>(0,1);
+	uniform_int_distribution<int> Sides3 = uniform_int_distribution<>(0,2);
 	
 	//Main function
 	GeneticAlg(mt19937 gen, int roomNumber, int finalRoomX, int finalRoomY):
-	randGen(gen), totalRooms(roomNumber){
+	randGen(gen), totalRooms(roomNumber), finalRoomX(finalRoomX), finalRoomY(finalRoomY){
 		// First assign all the values needed
 		mapRow = (roomNumber * 2) - 1;
 		mapSize = mapRow * mapRow;
 		iRoom = (totalRooms-1) + mapRow * (totalRooms-1);
 		eRoom = ((totalRooms-1) + finalRoomX) + (mapRow) * ((totalRooms-1) + finalRoomY);
+		roomDistance = abs(finalRoomX) + abs(finalRoomY) - 1;
 		maxNumber = numeric_limits<int>::max();
 		// Finally assign the memory space
 		assignMemory();
@@ -109,6 +115,46 @@ public:
 		baseSol.nodes[0] = iRoom;
 		baseSol.nodes[totalRooms - 1] = eRoom;
 		
+		// First create a route from 0 to totalRooms-1 (initial to final)
+
+		// We will use the minimal distance, with a total of:
+		int xMoves = abs(finalRoomX);
+		int yMoves = abs(finalRoomY);
+		int directionX = xMoves > 0? 1 : -1;
+		int directionY = yMoves > 0? 1 : -1;
+        	int lastRoom = iRoom;
+        	
+        	//"critical Route from init to end"
+		for(int i = 0; i < roomDistance; i++){
+			if(xMoves > 0 && yMoves > 0){
+				int selected = Sides2(randGen);
+				if(selected == 0){
+					xMoves -= 1;
+					lastRoom += directionX;
+					
+				}
+				else{
+					yMoves -= 1;
+					lastRoom += directionX * mapRow;
+				}
+			}
+			else{
+				if(xMoves > 0){
+					xMoves -= 1;
+					lastRoom += directionX;
+				}
+				else{
+					yMoves -= 1;
+					lastRoom += directionX * mapRow;
+				}
+			}
+			baseSol.nodes[1 + i] = lastRoom;
+		}
+		int totalMissingRooms = (totalRooms-1) - 2; 
+		int missingRooms = (totalRooms-1) - 2 - (roomDistance - 1);
+		// cout << "total Rooms: " << totalRooms << endl;
+		// cout << "missing Rooms: " << missingRooms << endl;
+		
 		/*
 		cout << baseSol.nodes[0] << " " <<
 			baseSol.nodes[1] << " " <<
@@ -122,7 +168,6 @@ public:
 	
 	// Recieves a chromosome organized from less to max and print their map interpretations
 	void printChromosome(Individual indv) {
-	
 		int first = baseSol.nodes[0];
 		int last = baseSol.nodes[totalRooms - 1];
 		int map[totalRooms];
@@ -134,6 +179,7 @@ public:
         	int currentInnerIndex = 0;
         	int current = map[currentInnerIndex];
         	int currentLine = 0;
+		/*
 		for (int j = 0; j < mapSize; ++j)
 		{
 			if (j == current){
@@ -153,7 +199,7 @@ public:
 				current = map[currentInnerIndex];
 			}
 			else{
-				cout << "▣ ";
+				cout << "▣.";
 			}
 			
 			if((j + 1) / mapRow > currentLine){
@@ -161,17 +207,18 @@ public:
 				cout << endl;
 			}
 		}
+		*/
 		
     	}
 
 };
 
-GeneticAlg runGA(int seed,int rooms,int finalNodeX,int finalNodeY){
+GeneticAlg runGA(int seed,int rooms,int finalRoomX,int finalRoomY){
 	// Seed assignation and first cout
 	static mt19937  gen(seed);
 	
 	// Calculations
-	int roomDistance = abs(finalNodeX) + abs(finalNodeY);
+	int roomDistance = abs(finalRoomX) + abs(finalRoomY);
 	
 	// Minimal requirement to be able to reach the end position
 	if( roomDistance + 1 > rooms) {
@@ -180,7 +227,7 @@ GeneticAlg runGA(int seed,int rooms,int finalNodeX,int finalNodeY){
 
 	
 	// Run the Algorithm
-	GeneticAlg genAlg(gen, rooms, finalNodeX, finalNodeY);
+	GeneticAlg genAlg(gen, rooms, finalRoomX, finalRoomY);
 	genAlg.evolvePop();
 	
 	// Obtain the best solutions of all the posibles !!!
@@ -198,7 +245,10 @@ void ga(double *warray) {
 	
 	int finalRoomX = int(warray[2]);
 	int finalRoomY = int(warray[3]);
+	int waitTime = int(warray[4]);
 	
+
+
 	GeneticAlg genAlg = runGA(seed, rooms, finalRoomX, finalRoomY);
 	
 	// Save data 
@@ -208,36 +258,34 @@ void ga(double *warray) {
 	
 }
 
-
 int main() {
 	// Variables for testing
-	// Considering initial node (0,0)
-	int seed = 1;
-	int rooms = 5;
+	// Go with the same call
+	double *array; 
+	array = (double*)malloc(10*sizeof(double));
+	array[0] = 4;
+	array[1] = 8;
+	array[2] = 3;
+	array[3] = 3;
+	array[4] = 5;
 	
-	int finalRoomX = 2;
-	int finalRoomY = 2;
+	ga(array);
 	
-	GeneticAlg genAlg = runGA(seed, rooms, finalRoomX, finalRoomY);
-	
-	// Save data 
-	
-	// Free data
-	genAlg.freeMemory();
-	
+	free(array);
 	return 0;
 }
 
 
 
 /*
+Solution, starting and ending rooms
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
-▣ ▣ ▣ ▣ ▫ □ □ □ ⟏ 
+▣ ▣ ▣ ▣ ▫ ▣ ▣ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
-▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
+▣ ▣ ▣ ▣ ▣ ▣ ⟏ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
 ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ ▣ 
 */
