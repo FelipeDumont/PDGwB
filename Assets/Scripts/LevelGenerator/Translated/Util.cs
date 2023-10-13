@@ -59,20 +59,23 @@ namespace LevelGenerator
         public const float PROB_NORMAL_ROOM = 70f;
         public const float PROB_KEY_ROOM = 15f;
         public const float PROB_LOCKER_ROOM = 15f;
-        public const int MAX_DEPTH = 10;
+        public static int MAX_DEPTH = 10;
         public const float NEIGHBORINGFACTOR = 0.7f;
         public const float CROSSOVER_RATE = 90f;
         public const float MUTATION_RATE = 5f;
         public const float MUTATION0_RATE = 50f;
         public const float MUTATION1_RATE = 50f;
-        public const int POP_SIZE = 100;
-        public const int GENERATIONS = 150;
+        public static int POP_SIZE = 100;
+        public static int GENERATIONS = 150;
         public const int PROB_SHORTCUT = 0;
         public const int MATRIXOFFSET = 150;
         public const string RESULTSFILE = "RESULTS";
         //Fitness parameters
         public static int nV, nK, nL;
         public static float lCoef;
+        public static bool modified;
+        public static bool useSymmetry;
+        public static float nSymmetry;
     }
 
 

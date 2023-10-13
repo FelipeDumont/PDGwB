@@ -28,8 +28,8 @@ namespace LevelGenerator
         [SerializeField] private int keyToOpen = -1;
         [SerializeField] private Type type; //Type of the room
 
-        private int x = 0;
-        private int y = 0;
+        [SerializeField] private int x = 0;
+        [SerializeField] private int y = 0;
         [SerializeField] private int depth = 0;
         //Rotation of the individual's parent position related to the normal cartesian orientation 
         //(with 0 meaning the parent is in the North of the child (Above), 90 being in the East (Right) and so on)
@@ -467,22 +467,6 @@ namespace LevelGenerator
             }
         }
 
-        /*
-         * Get the child of the room in the given direction
-         */
-        public Room GetChildByDirection(Util.Direction dir)
-        {
-            switch (dir)
-            {
-                case Util.Direction.down:
-                    return BottomChild;
-                case Util.Direction.left:
-                    return LeftChild;
-                case Util.Direction.right:
-                    return RightChild;
-            }
-            return null;
-        }
 
 
         /// <summary>

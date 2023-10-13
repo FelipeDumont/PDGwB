@@ -308,51 +308,6 @@ namespace LevelGenerator
                     toVisit.Enqueue(actualRoom.RightChild);
             }
         }
-        /*
-         * Fixes a dungeons after crossover and mutation
-         * Just edit the room types using a breadth-first search algorithm with a similar algorithm as the one used
-         * to create the rooms
-         */
-        public void FixIndividual()
-        {
-            Room actualRoom;
-            Room child;
-            actualRoom = roomList[0];
-            toVisit.Clear();
-            toVisit.Enqueue(actualRoom);
-            RoomFactory.AvailableLockId.Clear();
-            RoomFactory.UsedLockId.Clear();
-
-            while (toVisit.Count > 0)
-            {
-                actualRoom = toVisit.Dequeue() as Room;
-
-                child = actualRoom.LeftChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
-                        toVisit.Enqueue(child);
-                    }
-                child = actualRoom.BottomChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
-                        toVisit.Enqueue(child);
-                    }
-                child = actualRoom.RightChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
-                        toVisit.Enqueue(child);
-                    }
-
-            }
-            nKeys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
-            nLocks = RoomFactory.UsedLockId.Count;
-        }
 
         /*
          * Add lock and key
@@ -518,11 +473,6 @@ namespace LevelGenerator
             
             nKeys -= Convert.ToInt32(hasKey);
             nLocks -= Convert.ToInt32(hasLock);
-        }
-
-        public void SetFitness(float fitness_)
-        {
-            fitness = fitness_;
         }
 
         public void SetBoundariesFromRoomList()

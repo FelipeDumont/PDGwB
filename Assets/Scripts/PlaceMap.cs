@@ -17,20 +17,39 @@ public class PlaceMap : MonoBehaviour
     [SerializeField] Color connectionNormal;
     [SerializeField] Color connectionBarrier;
     [SerializeField] TestingGenerator tg;
-    bool placedOnce = false;
+    [SerializeField] bool placedOnce = false;
+    [SerializeField] bool next = false;
+    [SerializeField] int displayDungeon = -1;
     Dictionary<int,int> placedKeys = new Dictionary<int, int>();
 
     public void Update()
     {
-        if (tg != null && tg.FinishedGeneration() && placedOnce == false)
+        if (tg != null && tg.FinishedGeneration() && placedOnce == false && displayDungeon == -1)
         {
+            CleanSleeve();
             PlaceDungeonMap(tg.GetCurrentDungeonMap());
+        }
+
+        if (displayDungeon >= 0 && placedOnce == false)
+        {
+            CleanSleeve();
+            PlaceDungeonMap(tg.GetDungeon(displayDungeon));
+        }
+        if (next)
+        {
+            next = false;
+            if (displayDungeon + 1 < tg.GetDungeonCount())
+            {
+                displayDungeon += 1;
+            }
+            placedOnce = false;
         }
     }
 
     public void PlaceDungeonMap(Dungeon dungeonMap)
     {
         placedOnce = true;
+        Debug.Log(dungeonMap.RoomList);
         for (int i = 0, length = dungeonMap.RoomList.Count; i < length; i++)
         {
             // Text First Room 
@@ -98,5 +117,25 @@ public class PlaceMap : MonoBehaviour
         SpriteRenderer connection =  Instantiate(current, new Vector3(parent.X + middleX, parent.Y + middleY, 0), Quaternion.identity, mapParent);
         connection.color = son.Type == Type.locked ? connectionBarrier : connectionNormal;
         connections.Add(connection);
+    }
+
+    public void CleanSleeve()
+    {
+        foreach(SpriteRenderer sp in map)
+        {
+            Destroy(sp.gameObject);
+        }
+        foreach(SpriteRenderer con in connections)
+        {
+            Destroy(con.gameObject);
+        }
+        foreach(TextMeshPro t in texts)
+        {
+            Destroy(t.gameObject);
+        }
+        texts.Clear();
+        connections.Clear();
+        map.Clear();
+        placedKeys.Clear(); 
     }
 }

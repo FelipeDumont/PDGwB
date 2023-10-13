@@ -259,6 +259,7 @@ namespace LevelGenerator
             float avgUsedRoom = 0.0f;
             DFS[] dfs = new DFS[3];
             AStar astar = new AStar();
+            float indSym = 0;
             //Only use the A* and DFS if there is a lock in the dungeon
             if (ind.nLocks > 0)
             {
@@ -267,37 +268,61 @@ namespace LevelGenerator
                 //Execute 3 times the DFS to minimize the randomness
                 //Execute them in parallel to make things faster
                 //The DFS finds the number of rooms needed to finish the dungeon be exploring blindly.
-                if (seedDFS.Count == 0)
+                if (Constants.modified == false)
                 {
-                    seedDFS.Add(Util.rnd.Next(100));
-                    seedDFS.Add(Util.rnd.Next(100));
-                    seedDFS.Add(Util.rnd.Next(100));
-                }
+                    Parallel.For(0, 3, (i) =>
+                    {
 
-                
-                Parallel.For(0, 3, (i) =>
-                {
-                    
-                    lock (dfsLock)
-                    {
-                        dfs[i] = new DFS(ind);
-                    }
-                    dfs[i].FindRoute(seedDFS[i]);
-                    lock (avgRoomLock)
-                    {
-                        avgUsedRoom += dfs[i].NVisitedRooms;
-                    }
-                });
-                
-                // Work the Same But the engine does freeze
-                /*
-                for (int i = 0; i < 3; i++)
-                {
-                    dfs[i] = new DFS(ind);
-                    dfs[i].FindRoute(seedDFS[i]);
-                    avgUsedRoom += dfs[i].NVisitedRooms;
+                        lock (dfsLock)
+                        {
+                            dfs[i] = new DFS(ind);
+                        }
+                        dfs[i].FindRoute(seedDFS[i]);
+                        lock (avgRoomLock)
+                        {
+                            avgUsedRoom += dfs[i].NVisitedRooms;
+                        }
+                    });
                 }
-                */
+                if (Constants.useSymmetry)
+                {
+                    int sRooms = 0;
+                    int symmetricRooms = 0;
+                    List<Room> ids = new List<Room>();
+                    // Just center L and R
+                    foreach (Room room in ind.RoomList)
+                    {
+                        if(room.X != 0)
+                        {
+                            ids.Add(room);
+                            sRooms += 1;
+                        }
+                    }
+                    while ( ids.Count > 0)
+                    {
+                        Room r = ids[0];
+                        ids.RemoveAt(0);
+                        int foundSymID = -1;
+                        for (int i = 0; i < ids.Count; i++)
+                        {
+                            // Center in 0 symmetry in X
+                            if(ids[i].X == -r.X && ids[i].Y == r.Y)
+                            {
+                                // Found equivalent
+                                symmetricRooms += 1;
+                                foundSymID = i;
+                                break;
+                            }
+                        }
+                        if (foundSymID != -1)
+                        {
+                            ids.RemoveAt(foundSymID);
+                        }
+                    }
+                    // Onc all passes the symmetry is calculated based on the total rooms in existance
+                    indSym = (symmetricRooms * 1.0f) / sRooms;
+                }
+                
                 // Normal For ???
                 ind.neededRooms = avgUsedRoom / 3.0f;
 
@@ -312,12 +337,41 @@ namespace LevelGenerator
                     Debug.Log("SOMETHING IS REALLY WRONG!");
                 //If everything is ok, return the fitness. We are currently giving 5 times more emphasis to the linearity as a small difference results in very different dungeons
                 //We also are trying to make 80% of the rooms needed to finish, the rest are optional.
-                return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) 
-                    + System.Math.Abs(lCoef - ind.AvgChildren)*5) + (ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count*0.8f - ind.neededRooms));
+                if (Constants.modified == false)
+                {
+                    
+                    return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+                        + System.Math.Abs(lCoef - ind.AvgChildren) * 5) + (ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count * 0.8f - ind.neededRooms));
+                }
+                else
+                {
+                    if (Constants.useSymmetry)
+                    {
+                        return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+                            + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks)) + System.Math.Abs(Constants.nSymmetry - indSym);
+                    }
+                    else
+                    {
+                        return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+                            + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks));
+                    }
+                }
             }
             //If there are no locks, the fitness is based only in the map layout
             else
                 return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
+        }
+
+        public void SetDFSSeed()
+        {
+            // Reset every Generation
+            if (Constants.modified == false)
+            {
+                seedDFS.Clear();
+                seedDFS.Add(Util.rnd.Next(100));
+                seedDFS.Add(Util.rnd.Next(100));
+                seedDFS.Add(Util.rnd.Next(100));
+            }
         }
 
     }

@@ -23,7 +23,7 @@ namespace LevelGenerator
         //The object to use the EA methods
         private GA gaObj = new GA();
         //Creates the first population of dungeons and generate their rooms
-        List<Dungeon> dungeons;
+        [SerializeField] List<Dungeon> dungeons;
         [SerializeField] List<float> fitnessValues = new List<float>();
         //The aux the Game Manager will access to load the created dungeon
         public Dungeon aux;
@@ -62,23 +62,44 @@ namespace LevelGenerator
                 individual.GenerateRooms();
                 dungeons.Add(individual);
             }
-            aux = dungeons[0];
 
+            aux = dungeons[0];
             //Evolve all the generations from the GA
             for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
             {
+                // Set dfs fitness seeds each generation
+                gaObj.SetDFSSeed();
                 //Progress text that can only be used if we do this with threads
                 //TODO: someday, refactor everything to be used in parallel and with threads efficiently
                 if (progressText != null)
                     progressText.text = ((gen + 1) / (float)Constants.GENERATIONS) * 100 + "%";
+                
+                float best = float.PositiveInfinity;
+                int bestID = -1;
+                int counter = 0;
+
                 //Get every dungeon's fitness
                 foreach (Dungeon dun in dungeons)
                 {
                     dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                    if(dun.fitness < best)
+                    {
+                        best = dun.fitness;
+                        bestID = counter;
+                    }
+                    counter += 1;
                 }
 
                 //Elitism = save the best solution?
+                // is allways selecting the first one ...
                 aux = dungeons[0];
+
+                // Real elitism
+                if (Constants.modified == true)
+                {
+                    aux = dungeons[bestID];
+                }
+
                 foreach (Dungeon dun in dungeons)
                 {
                     actual = dun.fitness;
@@ -123,14 +144,40 @@ namespace LevelGenerator
                     childPop.Add(parent2);
                 }
 
-                //Elitism - now we get back the best one to the first position
-                childPop[0] = aux;
+                
+                if (Constants.modified == true)
+                {
+                    //Elitism - with the worst one !!!
+                    float worst = float.NegativeInfinity;
+                    int worstId = -1;
+                    counter = 0;
+                    foreach (Dungeon dun in dungeons)
+                    {
+                        dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                        if (dun.fitness > worst)
+                        {
+                            worst = dun.fitness;
+                            worstId = counter;
+                        }
+                        counter += 1;
+                    }
+                    childPop[worstId] = aux;
+                }
+                else
+                {
+                    //Elitism - now we get back the best one to the first position
+                    childPop[0] = aux;
+                }
                 dungeons = childPop;
 
             }
             //Find the best individual in the final population and print it as the answer
             min = Double.MaxValue;
+
+            
             aux = dungeons[0];
+            
+            
             foreach (Dungeon dun in dungeons)
             {
                 float actual = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
@@ -148,10 +195,10 @@ namespace LevelGenerator
             Debug.Log(time/1000f);
 
             hasFinished = true;
-            
+
             //Saves the test file that we used in the master thesis
             //CSVManager.SaveCSVLevel(id, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, time, Constants.RESULTSFILE+"-"+Constants.nV+"-" + Constants.nK + "-" + Constants.nL + "-" + Constants.lCoef + ".csv");
-            
+
             //Print info from best level if needed
             /*Debug.Log("Finished - fitnes:" + aux.fitness);
             Debug.Log("R:"+ aux.RoomList.Count+"-K:" + aux.nKeys + "-L:"+ aux.nLocks + "-Lin:"+aux.AvgChildren +"-nL:"+aux.neededLocks+"-nR:"+aux.neededRooms);
@@ -159,10 +206,25 @@ namespace LevelGenerator
 
             //This method prints the dungeon in the console (not unity's one) AND saves it into a file!
             // Interface.PrintNumericalGridWithConnections(aux);
-            
+
             //We should clear the dungeons... but Game Manager is using aux. So we could and should do a hard copy. But i'm not touching that spaghetti right now
             //TODO: touch spaghetti later
-            dungeons.Clear();
+            // TODO THIS WAS DONE, REMOVED FOR TESTING
+            // dungeons.Clear();
+            
+        }
+
+        public int GetDungeonCount()
+        {
+            return dungeons.Count;
+        }
+        public Dungeon GetDungeon(int id)
+        {
+            if (dungeons.Count > id)
+            {
+                return dungeons[id];
+            }
+            return null;
         }
     }
 }

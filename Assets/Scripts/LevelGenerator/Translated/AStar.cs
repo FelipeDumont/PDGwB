@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 //Thanks to https://bitbucket.org/dandago/experimental/src/7adeb5f8cdfb054b540887d53cabf27e22a10059/AStarPathfinding/?at=master
 namespace LevelGenerator
@@ -25,6 +26,7 @@ namespace LevelGenerator
         //The A* algorithm
         public int FindRoute(Dungeon dun, int matrixOffset)
         {
+            Debug.Log("Started searching on A*");
             //The path through the dungeon
             List<Location> path = new List<Location>();
 
@@ -58,12 +60,13 @@ namespace LevelGenerator
             List<int> keys = new List<int>();
 
             //Min and max boundaries of the grid based on the original grid
+            // Set MAX boundaries of "150" in both sides, not really used for now
             int minX, minY, maxX, maxY;
             minX = matrixOffset;
             minY = matrixOffset;
             maxX = -matrixOffset;
             maxY = -matrixOffset;
-            
+
             //Check all the rooms and add them to the keys and locks lists if they are one of them
             foreach (Room room in dun.RoomList)
             {
@@ -84,10 +87,12 @@ namespace LevelGenerator
                     maxX = room.X;
                 if (room.Y > maxY)
                     maxY = room.Y;
+                Debug.Log("[" + room.X + " " + room.Y + "]");
             }
 
             //The starting location is room (0,0)
             start = new Location { X = -2*minX, Y = -2*minY };
+            Debug.Log("[" + minX + " " + minY + "]");
             //List of visited rooms that are not closed yet
             var openList = new List<Location>();
             //List of closed rooms. They were visited and all neighboors explored.
@@ -110,6 +115,8 @@ namespace LevelGenerator
             }
 
             //Fill the new grid
+            // Reshape the grid, 0 -> 2N + offset (negative numbers)
+            // This will add rooms and connections to the grid, forcing the algorithm to take the routes leading to doors
             for (int i = minX; i < maxX + 1; ++i)
             {
                 for (int j = minY; j < maxY + 1; ++j)
@@ -118,6 +125,7 @@ namespace LevelGenerator
                     iPositive = i - minX;
                     jPositive = j - minY;
                     actualRoom = grid[i, j];
+                    
                     //If the position has a room, check its type and fill the grid accordingly
                     if (actualRoom != null)
                     {
@@ -126,22 +134,28 @@ namespace LevelGenerator
                         if (type == Type.normal)
                         {
                             map[iPositive * 2, jPositive * 2] = 0;
+                            Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                         }
                         //The sequential, positivie index of the key is its representation
                         else if (type == Type.key)
                         {
                             map[iPositive * 2, jPositive * 2] = keys.IndexOf(actualRoom.KeyToOpen)+1;
+                            Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                         }
                         //If the room is locked, the room is a normal room, only the corridor is locked. But is the lock is the last one in the sequential order, than the room is the objective
                         else if (type == Type.locked)
                         {
-                            if (lockedRooms.IndexOf(actualRoom.KeyToOpen) == lockedRooms.Count -1)
+                            if (lockedRooms.IndexOf(actualRoom.KeyToOpen) == lockedRooms.Count - 1)
                             {
                                 map[iPositive * 2, jPositive * 2] = 102;
                                 target = new Location { X = iPositive * 2, Y = jPositive * 2 };
+                                Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                             }
                             else
+                            {
                                 map[iPositive * 2, jPositive * 2] = 0;
+                                Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
+                            }
                         }
                         else
                         {
@@ -157,16 +171,22 @@ namespace LevelGenerator
                             y = parent.Y - actualRoom.Y + 2 * jPositive;
                             if (type == Type.locked)
                             {
-                                locksLocation.Add(new Location { X = x, Y = y, Parent = new Location { X = 2*(parent.X-actualRoom.X) +2*iPositive, Y = 2 * (parent.Y - actualRoom.Y) + 2 * jPositive } });
-                                map[x, y] = -(keys.IndexOf(actualRoom.KeyToOpen)+1);
+                                locksLocation.Add(new Location { X = x, Y = y, Parent = new Location { X = 2 * (parent.X - actualRoom.X) + 2 * iPositive, Y = 2 * (parent.Y - actualRoom.Y) + 2 * jPositive } });
+                                map[x, y] = -(keys.IndexOf(actualRoom.KeyToOpen) + 1);
+                                Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
                             }
                             //If the connection is open, 100 represents a normal corridor
                             else
+                            {
                                 map[x, y] = 100;
+                                Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
+                            }
                         }
                     }
                 }
             }
+
+            Debug.Log("Finished filling the A* Grid ready to do some stuff !!!");
             //Add all the locks location to the list that will hold their values through the execution of the algorithm
             foreach(var locked in locksLocation)
             {
@@ -182,6 +202,7 @@ namespace LevelGenerator
                 // get the square with the lowest F score
                 var lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
+                Debug.Log(current.X + ", "+ current.Y);
                 //if the current is a key, change the locked door status in the map
                 if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < 100)
                 {
@@ -268,6 +289,7 @@ namespace LevelGenerator
                         // and add it to the open list
                         path.Add(adjacentSquare);
                         openList.Insert(0, adjacentSquare);
+                        Debug.Log(adjacentSquare.X + ", " + adjacentSquare.Y + " = " + adjacentSquare.F);
                     }
                     else
                     {
@@ -278,11 +300,14 @@ namespace LevelGenerator
                             adjacentSquare.G = g;
                             adjacentSquare.F = adjacentSquare.G + adjacentSquare.H;
                             adjacentSquare.Parent = current;
+                            Debug.Log(adjacentSquare.X + ", " + adjacentSquare.Y + " = " + adjacentSquare.F);
                         }
                     }
                 }
             }
-
+            Debug.Log(start.X + " " + start.Y );
+            Debug.Log(target.X + " " + target.Y);
+            Debug.Log("Resulting needed locks : " + neededLocks);
             return neededLocks;
         }
         //Check what adjacent rooms exits and can be visited and return the valid ones
