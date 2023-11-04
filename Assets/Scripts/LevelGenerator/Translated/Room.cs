@@ -230,6 +230,7 @@ namespace LevelGenerator
                     //Checks the grid of room if the room is there, if not, create the room, add it in the grid and
                     //as the actual room's child, returning true
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
+                    // Debug.Log(X + "," + Y);
                     roomInGrid = roomGrid[X, Y];
                     if (roomInGrid == null)
                     {

@@ -34,7 +34,8 @@ namespace LevelGenerator
             //int lockId;
             Room room;
             
-            int prob = Util.rnd.Next(101);
+            int prob = Util.Next(101);
+            // UnityEngine.Debug.Log("CreateRoom (prob)" + prob);
             //If there are too many keys without locks, raises the chance to create a lock
             if (AvailableLockId.Count > 0)
             {

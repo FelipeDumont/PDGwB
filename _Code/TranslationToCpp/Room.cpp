@@ -1,11 +1,13 @@
 #include "Room.h"
-
+#include <iostream>
 
 Room::Room(){
-	
+	X = 0;
+	Y = 0;
 }
 
 Room::Room(int nX, int nY, int nK, RoomType nT, Room* nP){
+    
 	X = nX;
 	Y = nY;
 	keyToOpen = nK;
@@ -14,30 +16,32 @@ Room::Room(int nX, int nY, int nK, RoomType nT, Room* nP){
 }
 
 Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1) {
-            if (id == -1)
-                roomId = Constants::getNextId();
-            else
-                roomId = id;
-            type = roomType;
-            if (type == RoomType::key)
-                this->keyToOpen = roomId;
-            else if (type == RoomType::locked)
-                this->keyToOpen = keyToOpen;
-        }
+	X = 0;
+	Y = 0;
+	if (id == -1)
+		roomId = Constants::getNextId();
+	else
+		roomId = id;
+	type = roomType;
+	if (type == RoomType::key)
+		this->keyToOpen = roomId;
+	else if (type == RoomType::locked)
+		this->keyToOpen = keyToOpen;
+}
 
 
 Room* Room::Copy() {
-            Room* newRoom = new Room(type, keyToOpen, roomId);
-            newRoom->bottomChild = bottomChild;
-            newRoom->leftChild = leftChild;
-            newRoom->rightChild = rightChild;
-            newRoom->depth = depth;
-            newRoom->Parent = Parent;
-            newRoom->parentDirection = parentDirection;
-            newRoom->rotation = rotation;
-            newRoom->X = X;
-            newRoom->Y = Y;
-            return newRoom;
+	Room* newRoom = new Room(type, keyToOpen, roomId);
+	newRoom->bottomChild = bottomChild;
+	newRoom->leftChild = leftChild;
+	newRoom->rightChild = rightChild;
+	newRoom->depth = depth;
+	newRoom->Parent = Parent;
+	newRoom->parentDirection = parentDirection;
+	newRoom->rotation = rotation;
+	newRoom->X = X;
+	newRoom->Y = Y;
+	return newRoom;
 }
 
 
@@ -146,7 +150,8 @@ void Room::FixBranch(std::vector<int> specialRooms) {
 
 bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
     int X, Y;
-    Room* roomInGrid;
+    Room* roomInGrid = nullptr;
+    // std::cout << "dir ???" << dir << std::endl;
     switch (dir) {
         case Constants::Direction::right:
             // Calculate X and Y based on the parent's rotation
@@ -163,8 +168,9 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     X = this->X - 1;
                 Y = this->Y;
             }
+            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
-            roomInGrid = roomGrid.grid[X][Y]; // Assuming GetRoom method is available in RoomGrid class
+            roomInGrid = roomGrid.GetRoom(X,Y); // Assuming GetRoom method is available in RoomGrid class
             if (roomInGrid == nullptr) {
                 return true;
             } else {
@@ -186,8 +192,9 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     Y = this->Y + 1;
                 X = this->X;
             }
+            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
-            roomInGrid = roomGrid.grid[X][Y]; // Assuming GetRoom method is available in RoomGrid class
+            roomInGrid = roomGrid.GetRoom(X,Y);
             if (roomInGrid == nullptr) {
                 return true;
             } else {
@@ -209,8 +216,9 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     X = this->X + 1;
                 Y = this->Y;
             }
+            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
-            roomInGrid = roomGrid.grid[X][Y]; // Assuming GetRoom method is available in RoomGrid class
+            roomInGrid = roomGrid.GetRoom(X,Y); // Assuming GetRoom method is available in RoomGrid class
             if (roomInGrid == nullptr) {
                 return true;
             } else {
@@ -218,10 +226,15 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
             }
 
         default:
-            // std::cout << "Something went wrong while validating a child!\n";
-            // std::cout << "Direction not supported:\n\tOnly right, down, and left are allowed.\n\n";
+            // std::cout <<  "Default" << "\n";
+            
+            std::cout << "Something went wrong while validating a child!" << dir << "\n";
+            std::cout << "Direction not supported:\n\tOnly right, down, and left are allowed.\n\n";
             return false;
+        
     }
+    
+   return false;
 }
 
 void Room::InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGrid) {
@@ -246,7 +259,7 @@ void Room::InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGri
                 }
                 child->Y = this->Y;
             }
-            roomInGrid = roomGrid.grid[child->X][child->Y];
+            roomInGrid = roomGrid.GetRoom(child->X,child->Y);
             if (roomInGrid == nullptr) {
                 child->rotation = (this->rotation + 90) % 360;
                 this->rightChild = child;
@@ -270,7 +283,7 @@ void Room::InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGri
                 }
                 child->X = this->X;
             }
-            roomInGrid = roomGrid.grid[child->X][child->Y];
+            roomInGrid = roomGrid.GetRoom(child->X,child->Y);
             if (roomInGrid == nullptr) {
                 child->rotation = (this->rotation + 90) % 360;
                 this->bottomChild = child;
@@ -294,7 +307,7 @@ void Room::InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGri
                 }
                 child->Y = this->Y;
             }
-            roomInGrid = roomGrid.grid[child->X][child->Y];
+            roomInGrid = roomGrid.GetRoom(child->X,child->Y);
             if (roomInGrid == nullptr) {
                 child->rotation = (this->rotation + 90) % 360;
                 this->leftChild = child;
@@ -342,6 +355,43 @@ bool Room::IsLeafNode() {
     return false;
 }
 
+bool Room::Equal(Room* other){
+    // return other-> X == this-> X && other->Y == this->Y;
+    return false;
+}
 
 
+RoomGrid::RoomGrid(){
+    grid.resize(Constants::MATRIXOFFSET*2, std::vector<Room*>(Constants::MATRIXOFFSET*2,nullptr));
+}
 
+
+Room* RoomGrid::GetRoom(int x, int y){
+
+    return grid[x+ Constants::MATRIXOFFSET][y+ Constants::MATRIXOFFSET];
+
+}
+
+void RoomGrid::SetRoom(int x, int y, Room* value){
+    
+    grid[x+ Constants::MATRIXOFFSET][y+ Constants::MATRIXOFFSET] = value;
+
+}
+
+RoomGrid RoomGrid::Copy(){
+	RoomGrid newRoomGrid; // Create a new instance of the RoomGrid
+
+        // Copy the contents of the grid
+        for (std::vector<Room*> &row : grid) {
+            std::vector<Room*> newRow;
+            for (Room* room : row) {
+                // Copy the Room object and add it to the new grid
+                // Assuming the Room class has a copy constructor or a clone method
+                Room* newRoom = room->Copy(); 
+                newRow.push_back(newRoom);
+            }
+            newRoomGrid.grid.push_back(newRow);
+        }
+
+        return newRoomGrid;
+}

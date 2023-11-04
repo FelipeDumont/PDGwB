@@ -27,24 +27,7 @@ namespace LevelGenerator
         [SerializeField] List<float> fitnessValues = new List<float>();
         //The aux the Game Manager will access to load the created dungeon
         public Dungeon aux;
-        /**
-         * The constructor of the "Main" behind the EA
-         */
-        public Program()
-        {
-            hasFinished = false;
-            min = Double.MaxValue;
-            watch = System.Diagnostics.Stopwatch.StartNew();
-            dungeons = new List<Dungeon>(Constants.POP_SIZE);
-            // Generate the first population
-            for (int i = 0; i < dungeons.Capacity; ++i) 
-            {
-                Dungeon individual = new Dungeon();
-                individual.GenerateRooms();
-                dungeons.Add(individual);
-            }
-            aux = dungeons[0];
-        }
+
 
         // The "Main" behind the Dungeon Generator
         public void CreateDungeon(TextMeshProUGUI progressText = null)
@@ -64,6 +47,14 @@ namespace LevelGenerator
             }
 
             aux = dungeons[0];
+            /*
+            for (int i = 0; i < dungeons[1].RoomList.Count; i++)
+            {
+                Debug.Log("[" + dungeons[1].RoomList[i].X + ", " + dungeons[1].RoomList[i].Y + "]");
+            }
+            */
+
+            /*
             //Evolve all the generations from the GA
             for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
             {
@@ -190,9 +181,10 @@ namespace LevelGenerator
                     aux = dun.Copy();
                 }
             }
+            */
             watch.Stop();
             long time = watch.ElapsedMilliseconds;
-            Debug.Log(time/1000f);
+            Debug.Log("Total time " + time/1000f);
 
             hasFinished = true;
 

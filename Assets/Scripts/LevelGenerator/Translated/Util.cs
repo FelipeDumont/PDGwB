@@ -1,9 +1,13 @@
-﻿using System;
+﻿
+using System;
+using System.Collections.Generic;
 
 namespace LevelGenerator
 {
     public static class Util
     {
+        public static List<int> randomSequence;
+
         public enum Direction
         {
             right = 0,
@@ -22,6 +26,22 @@ namespace LevelGenerator
         }
 
         public static Random rnd = new Random();
+        public static int Next(int max)
+        {
+            int result = rnd.Next(max);
+            randomSequence.Add(result);
+            // UnityEngine.Debug.Log(result);
+            return result;
+        }
+        public static int Next(int min, int max)
+        {
+            int result = rnd.Next(min, max);
+            randomSequence.Add(result);
+            
+            // UnityEngine.Debug.Log(result);
+            return result;
+        }
+
         public static int ID = 0;
 
         public static int getNextId()

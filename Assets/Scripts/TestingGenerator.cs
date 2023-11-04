@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LevelGenerator;
+using System.IO;
 
 public class TestingGenerator : MonoBehaviour
 {
@@ -28,6 +29,10 @@ public class TestingGenerator : MonoBehaviour
 
     [SerializeField] bool finished = false;
     [SerializeField] bool runOnce = false;
+
+    [Header("Test")]
+    [SerializeField] bool createRandomSequenceFileNow = false;
+    public List<int> randomSequence = new List<int>();
     // Start is called before the first frame update
 
     public void Start()
@@ -36,12 +41,9 @@ public class TestingGenerator : MonoBehaviour
     }
     void RunGeneration()
     {
-
-        // Set generator
-        generator = new Program();
         LevelGenerator.Util.ID = 0;
-        // Assign Seed
         LevelGenerator.Util.rnd = new System.Random(currentSeed);
+        Util.randomSequence = new List<int>();
         
         // Fitness values !
         Constants.nV = nRooms;
@@ -70,7 +72,8 @@ public class TestingGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (runOnce){
+        if (runOnce)
+        {
             runOnce = false;
             RunGeneration();
         }
@@ -78,15 +81,21 @@ public class TestingGenerator : MonoBehaviour
         {
             if (generator.hasFinished)
             {
-                if(finished == false)
+                if (finished == false)
                 {
                     finished = true;
+                    this.randomSequence = Util.randomSequence;
                 }
             }
             else
             {
                 Debug.Log("Generating");
             }
+        }
+        if(createRandomSequenceFileNow == true && finished)
+        {
+            createRandomSequenceFileNow = false;
+            CreateRandomSequenceFile();
         }
     }
 
@@ -108,5 +117,27 @@ public class TestingGenerator : MonoBehaviour
     public Dungeon GetDungeon(int id)
     {
         return generator.GetDungeon(id);
+    }
+
+    private string filePath = "Assets/RandomSequence.txt";
+
+    public void CreateRandomSequenceFile()
+    {
+        // Check if the file already exists, and if it does, delete it
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+
+        // Create a new file and write to it line by line
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            foreach(var number in randomSequence)
+            {
+                writer.WriteLine(number);
+            }
+        }
+
+        Debug.Log("File created successfully at: " + filePath);
     }
 }

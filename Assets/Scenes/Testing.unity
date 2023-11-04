@@ -23468,7 +23468,7 @@ MonoBehaviour:
   GENERATIONS: 0
   POP_SIZE: 2
   MAX_DEPTH: 4
-  useSymmetry: 1
+  useSymmetry: 0
   symmetry: 1
   generator:
     hasFinished: 0

@@ -95,7 +95,7 @@ namespace LevelGenerator
             Room roomCut1, roomCut2;
             //List of rooms that were the root of the branch and led to an impossible crossover (Tabu List)
             List<Room> failedRooms;
-            int prob = Util.rnd.Next(100);
+            int prob = Util.Next(100);
             //List of special rooms in the branch to be traded of each parent
             List<int> specialRooms1 = new List<int>(), specialRooms2 = new List<int>();
             //List of special rooms in the traded brach after the crossover
@@ -112,7 +112,7 @@ namespace LevelGenerator
                     ind2 = indOriginal2.Copy();
 
                     //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                    roomCut1 = ind1.RoomList[Util.rnd.Next(1, ind1.RoomList.Count)];
+                    roomCut1 = ind1.RoomList[Util.Next(1, ind1.RoomList.Count)];
                     FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
                     failedRooms = new List<Room>();
 
@@ -122,7 +122,7 @@ namespace LevelGenerator
                     {
                         do
                         {
-                            roomCut2 = ind2.RoomList[Util.rnd.Next(1, ind2.RoomList.Count)];
+                            roomCut2 = ind2.RoomList[Util.Next(1, ind2.RoomList.Count)];
                         } while (failedRooms.Contains(roomCut2));
                         failedRooms.Add(roomCut2);
                         if (failedRooms.Count == ind2.RoomList.Count - 1)
@@ -205,11 +205,11 @@ namespace LevelGenerator
             try
             {
                 //Mutate keys, adding or removing a pair
-                bool willMutate = Util.rnd.Next(101) <= Constants.MUTATION_RATE;
+                bool willMutate = Util.Next(101) <= Constants.MUTATION_RATE;
                 MutationOp op;
                 if (willMutate)
                 {
-                    op = Util.rnd.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
+                    op = Util.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
                     switch (op)
                     {
                         case MutationOp.insertChild:
@@ -239,7 +239,7 @@ namespace LevelGenerator
             List<int> parentPosL = new List<int>();
             do
             {
-                int pos = Util.rnd.Next(pop.Count);
+                int pos = Util.Next(pop.Count);
                 if (posHash.Add(pos))
                 {
                     parentPosL.Add(pos);
@@ -368,9 +368,9 @@ namespace LevelGenerator
             if (Constants.modified == false)
             {
                 seedDFS.Clear();
-                seedDFS.Add(Util.rnd.Next(100));
-                seedDFS.Add(Util.rnd.Next(100));
-                seedDFS.Add(Util.rnd.Next(100));
+                seedDFS.Add(Util.Next(100));
+                seedDFS.Add(Util.Next(100));
+                seedDFS.Add(Util.Next(100));
             }
         }
 

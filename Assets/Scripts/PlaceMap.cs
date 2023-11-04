@@ -49,7 +49,7 @@ public class PlaceMap : MonoBehaviour
     public void PlaceDungeonMap(Dungeon dungeonMap)
     {
         placedOnce = true;
-        Debug.Log(dungeonMap.RoomList);
+        // Debug.Log(dungeonMap.RoomList);
         for (int i = 0, length = dungeonMap.RoomList.Count; i < length; i++)
         {
             // Text First Room 

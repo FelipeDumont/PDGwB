@@ -51,8 +51,14 @@ public:
 
 	static int seed;
 	static std::mt19937 randGen;
-        static std::uniform_int_distribution<int> prob;
+	static std::uniform_int_distribution<int> prob100;
+	static std::uniform_int_distribution<int> prob101;
+	static std::uniform_int_distribution<int> prob3;// 0,1,2
+	static std::uniform_int_distribution<int> prob1To3;// 0,1,2
     
+	static std::vector<int> randomSequence;
+	static bool isForced;
+	static std::vector<int> forcedRandomSequence;
 	// Enumeration for directions
 	enum Direction {
 		right = 0,
@@ -61,7 +67,11 @@ public:
 	};
 	
 	static int getNextId();
+	static int SelectRandom(int value);
+	static int Next100();
 	static int Next101();
+	static int Next3();
+	static int Next1To3();
 };
 
 // Dimensions class to handle width and height of objects

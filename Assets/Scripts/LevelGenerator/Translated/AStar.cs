@@ -186,7 +186,7 @@ namespace LevelGenerator
                 }
             }
 
-            Debug.Log("Finished filling the A* Grid ready to do some stuff !!!");
+            // Debug.Log("Finished filling the A* Grid ready to do some stuff !!!");
             //Add all the locks location to the list that will hold their values through the execution of the algorithm
             foreach(var locked in locksLocation)
             {

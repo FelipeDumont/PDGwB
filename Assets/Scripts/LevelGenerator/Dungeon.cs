@@ -244,7 +244,8 @@ namespace LevelGenerator
                     break;
                 }
                 //Check how many children the node will have, if any.
-                prob = Util.rnd.Next(100);
+                prob = Util.Next(100);
+                // UnityEngine.Debug.Log("GenerateRooms A (prob)" + prob);
                 //Console.WriteLine(prob);
                 //The parent node has 100% chance to have children, then, at each height, 10% of chance to NOT have children is added.
                 //If a node has a child, create it with the RoomFactory, insert it as a child of the actual node in the right place
@@ -252,8 +253,11 @@ namespace LevelGenerator
                 if (prob <= (Constants.PROB_HAS_CHILD * (1 - actualDepth / (Constants.MAX_DEPTH + 1))))
                 {
                     Room child = null;
-                    Util.Direction dir = (Util.Direction)Util.rnd.Next(3);
-                    prob = Util.rnd.Next(101);
+                    prob = Util.Next(3);
+                    //UnityEngine.Debug.Log("GenerateRooms B (dir)" + prob);
+                    Util.Direction dir = (Util.Direction)prob;
+                    prob = Util.Next(101);
+                    // UnityEngine.Debug.Log("GenerateRooms C (prob)" + prob);
 
                     if (prob < Constants.PROB_1_CHILD)
                     {
@@ -267,7 +271,9 @@ namespace LevelGenerator
                         Util.Direction dir2;
                         do
                         {
-                            dir2 = (Util.Direction)Util.rnd.Next(3);
+                            prob = Util.Next(3);
+                            //UnityEngine.Debug.Log("GenerateRooms D (dir)" + prob);
+                            dir2 = (Util.Direction)prob;
                         } while (dir == dir2);
                         InstantiateRoom(ref child, ref actualRoom, dir2);
                     }
@@ -329,7 +335,7 @@ namespace LevelGenerator
                 if (actualRoom.Type == Type.normal && !actualRoom.Equals(roomList[0]))
                 {
                     //if (Util.rnd.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM + Convert.ToInt32(hasKey)*Constants.PROB_KEY_ROOM)
-                    if (Util.rnd.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
+                    if (Util.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
                     {
                         if (!hasKey)
                         {
@@ -376,7 +382,7 @@ namespace LevelGenerator
          */
         public void RemoveLockAndKey()
         {
-            int removeKey = Util.rnd.Next(nKeys);
+            int removeKey = Util.Next(nKeys);
             int removeLock = removeKey;
             Room actualRoom;
             Room child;

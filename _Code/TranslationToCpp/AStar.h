@@ -30,7 +30,7 @@ public:
 class AStar {
 public:
 	// The A* algorithm for finding the route in the dungeon
-	int FindRoute(Dungeon* dun, int matrixOffset);
+	int FindRoute(Dungeon dun, int matrixOffset);
 	// Other AStar class methods and members
 };
 

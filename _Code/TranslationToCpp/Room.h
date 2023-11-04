@@ -47,11 +47,21 @@ public:
     void SetParent(Room* parent);
     void FindChildren(std::vector<Room*>& roomList);
     bool IsLeafNode();
+    bool Equal(Room* other);
+    
 };
 
 class RoomGrid {
-public:
+private:
     std::vector<std::vector<Room*>> grid;
+public:
+    
+
+    RoomGrid();
+    Room* GetRoom(int x, int y);
+    void SetRoom(int x, int y, Room* value);
+    
+    RoomGrid Copy();
 };
 
 

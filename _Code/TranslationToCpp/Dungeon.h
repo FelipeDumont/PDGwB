@@ -19,20 +19,22 @@ public:
     std::vector<Room> roomList;
     RoomGrid roomGrid;
     float fitness;
+    
     Dungeon();
 
 
-    Dungeon* Copy();
+    Dungeon Copy();
 
     void CalcAvgChildren();
-/*
-    void InstantiateRoom(Room*& child, Room*& actualRoom, int dir);
+
+    void InstantiateRoom(Room* child, Room* actualRoom, Constants::Direction dir);
 
     void RemoveFromGrid(Room* cut);
-
-    void RefreshGrid(Room*& newRoom);
-
+    
     void GenerateRooms();
+    
+/*
+    void RefreshGrid(Room*& newRoom);
 
     void FixRoomList();
 
