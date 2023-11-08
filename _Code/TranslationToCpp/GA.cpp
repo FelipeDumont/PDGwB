@@ -78,24 +78,69 @@ void ReadSequence(){
     }
 }
 
+float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset) {
+        float avgUsedRoom = 0.0f;
+        AStar astar;
+        float indSym = 0;
+        
+        if (ind.nLocks > 0) {
+            ind.neededLocks = astar.FindRoute(ind, matrixOffset);
+			
+            if (ind.neededRooms > ind.roomList.size()) {
+                std::cout << "SOMETHING IS REALLY WRONG! Nrooms: " << std::to_string(ind.roomList.size()) << "  Used: " << std::to_string(ind.neededRooms)<< std::endl;
+            }
+            if (ind.neededLocks > ind.nLocks) {
+                std::cout << "SOMETHING IS REALLY WRONG!"<< std::endl;
+            }
+			// std::cout << "needed Locks ... " <<  ind.neededLocks << std::endl;
+			return (2 * (std::abs(nV - ((int)ind.roomList.size())) + std::abs(nK - ind.nKeys) + std::abs(nL - ind.nLocks) + std::abs(lCoef - ind.avgChildren)) + (ind.nLocks - ind.neededLocks));
+			
+        } else {
+            return (2 * (std::abs(nV - ((int)ind.roomList.size())) + std::abs(nK - ind.nKeys) + std::abs(nL - ind.nLocks) + std::abs(lCoef - ind.avgChildren)));
+        }
+		return 0;
+    }
 
 std::vector<Dungeon> CreateDungeon(){
 	
 	float minFitness = std::numeric_limits<float>::max();
 	std::vector<Dungeon> dungeons;
-	for(int i = 0; i < Constants::POP_SIZE; i ++){
+	
+	for(int dungeonID = 0; dungeonID < Constants::POP_SIZE; dungeonID++){
 		Dungeon individual;
 		individual.GenerateRooms();
 		dungeons.push_back(individual);
+		
+	
 	}
+	/*
 	// Rest of the generation ...
 	
-	// Display 1
-	/*
-	for(int i = 0; i < dungeons[1].roomList.size(); i++){
-		std::cout << "[" << dungeons[1].roomList[i].X << ", " << dungeons[1].roomList[i].Y << "]" << std::endl; 
+	for(int dungeonID = 0; dungeonID < Constants::POP_SIZE; dungeonID++){
+		std::cout << "Dungeon " << dungeonID << std::endl;
+		for(int i = 0; i < dungeons[dungeonID].roomList.size(); i++){
+			std::cout << "[" << dungeons[dungeonID].roomList[i].X << ", " << dungeons[dungeonID].roomList[i].Y << "]" << ((int)dungeons[dungeonID].roomList[i].type) << " : " << dungeons[dungeonID].roomList[i].keyToOpen << std::endl; 
+			
+			if(dungeons[dungeonID].roomList[i].Parent != nullptr){
+				std::cout << "P[ " << dungeons[dungeonID].roomList[i].Parent->X << ", " << dungeons[dungeonID].roomList[i].Parent->Y << "]"<< ((int)dungeons[dungeonID].roomList[i].Parent->type) << " : " << dungeons[dungeonID].roomList[i].Parent->keyToOpen << std::endl;
+			}
+			
+		}
 	}
 	*/
+
+	for(int dungeonID = 0; dungeonID < Constants::POP_SIZE; dungeonID++){
+		// Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset
+		float fitness = Fitness(dungeons[dungeonID], Constants::nV, Constants::nK, Constants::nL, Constants::lCoef, Constants::MATRIXOFFSET);
+		
+		std::cout << "Fitness " << fitness << std::endl;
+	}
+
+	
+	
+	
+
+
 
 	return dungeons;
 }
@@ -116,7 +161,7 @@ int main() {
 		Constants::nV = 5; 			// Rooms
 		Constants::nK = 1; 			// Keys
 		Constants::nL = 1; 			// Barriers
-		Constants::lCoef = 1.2; 		// Linearity !
+		Constants::lCoef = 1.2; 	// Linearity !
 		
 		if(useForcedRandomSequence){
 			ReadSequence();

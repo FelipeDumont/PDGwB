@@ -265,9 +265,12 @@ namespace LevelGenerator
             {
                 //The A* finds the number of locks needed to finish the dungeon using the heuristic that is close to optimal.
                 ind.neededLocks = astar.FindRoute(ind, matrixOffset);
+                // Debug.Log("Neeeded locks: " + ind.neededLocks);
                 //Execute 3 times the DFS to minimize the randomness
                 //Execute them in parallel to make things faster
                 //The DFS finds the number of rooms needed to finish the dungeon be exploring blindly.
+
+                /*
                 if (Constants.modified == false)
                 {
                     Parallel.For(0, 3, (i) =>
@@ -322,6 +325,7 @@ namespace LevelGenerator
                     // Onc all passes the symmetry is calculated based on the total rooms in existance
                     indSym = (symmetricRooms * 1.0f) / sRooms;
                 }
+                */
                 
                 // Normal For ???
                 ind.neededRooms = avgUsedRoom / 3.0f;
@@ -347,11 +351,13 @@ namespace LevelGenerator
                 {
                     if (Constants.useSymmetry)
                     {
+                        
                         return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
                             + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks)) + System.Math.Abs(Constants.nSymmetry - indSym);
                     }
                     else
                     {
+                        // Debug.Log(ind.neededLocks);
                         return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
                             + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks));
                     }

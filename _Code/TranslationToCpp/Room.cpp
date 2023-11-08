@@ -378,8 +378,8 @@ void RoomGrid::SetRoom(int x, int y, Room* value){
 
 }
 
-RoomGrid RoomGrid::Copy(){
-	RoomGrid newRoomGrid; // Create a new instance of the RoomGrid
+RoomGrid* RoomGrid::Copy(){
+	RoomGrid* newRoomGrid = new RoomGrid(); // Create a new instance of the RoomGrid
 
         // Copy the contents of the grid
         for (std::vector<Room*> &row : grid) {
@@ -390,7 +390,7 @@ RoomGrid RoomGrid::Copy(){
                 Room* newRoom = room->Copy(); 
                 newRow.push_back(newRoom);
             }
-            newRoomGrid.grid.push_back(newRow);
+            newRoomGrid->grid.push_back(newRow);
         }
 
         return newRoomGrid;

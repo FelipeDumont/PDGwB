@@ -139,9 +139,9 @@ namespace LevelGenerator
             if (actualRoom.ValidateChild(dir, roomGrid))
             {
                 child = RoomFactory.CreateRoom();
-                //System.Console.WriteLine("Created! ID = " + child.RoomId);
+                // Debug.Log("Created! ID = " + child.RoomId);
                 actualRoom.InsertChild(dir, ref child, ref roomGrid);
-                //System.Console.WriteLine("Inserted! ID = " + child.RoomId);
+                // Debug.Log("Inserted! ID = " + child.RoomId);
                 child.ParentDirection = dir;
                 toVisit.Enqueue(child);
                 RoomList.Add(child);

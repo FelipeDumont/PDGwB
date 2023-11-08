@@ -15,7 +15,7 @@ public:
     float avgChildren;
     Boundaries boundaries;
     Dimensions dimensions;
-    std::queue<Room> toVisit;
+    std::queue<Room*> toVisit;
     std::vector<Room> roomList;
     RoomGrid roomGrid;
     float fitness;
@@ -23,7 +23,7 @@ public:
     Dungeon();
 
 
-    Dungeon Copy();
+    Dungeon* Copy();
 
     void CalcAvgChildren();
 

@@ -61,7 +61,7 @@ public:
     Room* GetRoom(int x, int y);
     void SetRoom(int x, int y, Room* value);
     
-    RoomGrid Copy();
+    RoomGrid* Copy();
 };
 
 

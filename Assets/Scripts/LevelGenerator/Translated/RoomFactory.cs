@@ -52,7 +52,7 @@ namespace LevelGenerator
                  */
                 room = new Room(Type.key);
                 AvailableLockId.Add(room.RoomId);
-                //Console.WriteLine("KeyId:" + room.RoomId);
+                // UnityEngine.Debug.Log("KEY ROOM: KeyId:" + room.RoomId);
             }
             else
             {
@@ -65,8 +65,8 @@ namespace LevelGenerator
                     //Creates a room containing a key
                     room = new Room(Type.key);
                     AvailableLockId.Add(room.RoomId);
-
-                    //Console.WriteLine("KeyId:" + room.RoomId);
+                    // UnityEngine.Debug.Log("KEY ROOM: KeyId:" + room.RoomId);
+                    // Console.WriteLine("KeyId:" + room.RoomId);
                 }
                 else
                 {
@@ -79,6 +79,7 @@ namespace LevelGenerator
                     UsedLockId.Add(room.RoomId);
 
                     //Console.WriteLine("LockId:" + keyToOpen);
+                    // UnityEngine.Debug.Log("Lock ROOM: KeyToOpen:" + keyToOpen);
                 }
             }
             return room;

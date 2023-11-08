@@ -53,11 +53,11 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
         for (Room room : dun.roomList) {
             if (room.type == RoomType::key) {
                 keys.push_back(room.keyToOpen);
-                // std::cout << "adding Key [ " << room.KeyToOpen << "]" <<std::endl;
+                // std::cout << "adding Key [ " << room.keyToOpen << "]" <<std::endl;
             }
             if (room.type == RoomType::locked) {
                 lockedRooms.push_back(room.keyToOpen);
-                // std::cout << "adding lock [" << room.KeyToOpen << "]"<< std::endl;
+                // std::cout << "adding lock [" << room.keyToOpen << "]"<< std::endl;
             }
 
             // Check the boundaries of the farthest rooms in the grid
@@ -96,6 +96,7 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
     std::vector<std::vector<int>> map(2 * sizeX, std::vector<int>(2 * sizeY, 101));
     // std::cout << 2 * sizeX << " " << 2 * sizeY << "\n\n";
 
+    // std::cout << "Create new grid" << "\n\n";
     // Fill the new grid
     for (int i = minX; i < maxX + 1; ++i) {
         for (int j = minY; j < maxY + 1; ++j) {
@@ -126,9 +127,10 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
                     if (findIndex(lockedRooms, actualRoom->keyToOpen) == lockedRooms.size() - 1) {
                         map[iPositive * 2][jPositive * 2] = 102;
                         target = new Location{ iPositive * 2, jPositive * 2 };
+                        // std::cout << "LR ["<<  iPositive * 2 << ", " << jPositive * 2 << "] = " << map[iPositive * 2][jPositive * 2]<< std::endl;
                     } else
                         map[iPositive * 2][jPositive * 2] = 0;
-                    // std::cout << "LR ["<<  iPositive * 2 << ", " << jPositive * 2 << "] = " << map[iPositive * 2][jPositive * 2]<< std::endl;
+                        // std::cout << "LR ["<<  iPositive * 2 << ", " << jPositive * 2 << "] = " << map[iPositive * 2][jPositive * 2]<< std::endl;
                 } else {
                     // std::cout << "Something went wrong printing the tree!\n";
                     // std::cout << "This Room type does not exist!\n\n";
@@ -145,8 +147,8 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
                     if (type == RoomType::locked) {
                         Location* loc = new Location{ x, y,0,0,0, new Location{ 2 * (parent->X - actualRoom->X) + 2 * iPositive, 2 * (parent->Y - actualRoom->Y) + 2 * jPositive } };
                         locksLocation.push_back(*loc);
-                        map[x][y] = -(findIndex(keys, -actualRoom->keyToOpen) + 1);
-                        // std::cout << "CR ["<<  x << ", " << y << "] = " << map[x][y] << std::endl;
+                        map[x][y] = -(findIndex(keys, actualRoom->keyToOpen) + 1);
+                        // std::cout << "CR ["<<  x << ", " << y << "] = " << map[x][y] << "index of" << findIndex(keys, actualRoom->keyToOpen) << std::endl;
                     }
                     // If the connection is open, 100 represents a normal corridor
                     else{
@@ -161,9 +163,8 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
         }
     }
 	
-	
-	// std::cout <<  start->X << " "  << start->Y << std::endl;
-	// std::cout <<  target->X << " "  << target->Y << std::endl;
+	// std::cout <<  "S" << start->X << " "  << start->Y << std::endl;
+	// std::cout <<  "T" << target->X << " "  << target->Y << std::endl;
 
 	
     // Add all the locks location to the list that will hold their values through the execution of the algorithm
@@ -182,7 +183,7 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
         int lowest = findLowestF(openList);
 
         current = openList[lowest];
-        // std::cout << "ID : "<< current.X << "," << current.Y << std::endl;
+        // std::cout << "[ "<< current.X << "," << current.Y << "]" << std::endl;
     
         // If the current is a key, change the locked door status in the map
         if (map[current.X][current.Y] > 0 && map[current.X][current.Y] < 100) {
@@ -315,7 +316,7 @@ int ComputeHScore(int x, int y, int targetX, int targetY) {
 	return std::abs(targetX - x) + std::abs(targetY - y);
 }
 
-int findIndex(std::vector<int>&vec, int target){
+int findIndex(std::vector<int>& vec, int target){
 	for(int i = 0; i < vec.size(); ++i){
 		if(vec[i] == target){
 			return i;

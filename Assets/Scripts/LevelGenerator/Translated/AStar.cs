@@ -26,7 +26,7 @@ namespace LevelGenerator
         //The A* algorithm
         public int FindRoute(Dungeon dun, int matrixOffset)
         {
-            Debug.Log("Started searching on A*");
+            // Debug.Log("Started searching on A*");
             //The path through the dungeon
             List<Location> path = new List<Location>();
 
@@ -87,12 +87,12 @@ namespace LevelGenerator
                     maxX = room.X;
                 if (room.Y > maxY)
                     maxY = room.Y;
-                Debug.Log("[" + room.X + " " + room.Y + "]");
+                // Debug.Log("[" + room.X + " " + room.Y + "]");
             }
 
             //The starting location is room (0,0)
             start = new Location { X = -2*minX, Y = -2*minY };
-            Debug.Log("[" + minX + " " + minY + "]");
+            // Debug.Log("[" + minX + " " + minY + "]");
             //List of visited rooms that are not closed yet
             var openList = new List<Location>();
             //List of closed rooms. They were visited and all neighboors explored.
@@ -134,13 +134,13 @@ namespace LevelGenerator
                         if (type == Type.normal)
                         {
                             map[iPositive * 2, jPositive * 2] = 0;
-                            Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
+                            // Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                         }
                         //The sequential, positivie index of the key is its representation
                         else if (type == Type.key)
                         {
                             map[iPositive * 2, jPositive * 2] = keys.IndexOf(actualRoom.KeyToOpen)+1;
-                            Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
+                            // Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                         }
                         //If the room is locked, the room is a normal room, only the corridor is locked. But is the lock is the last one in the sequential order, than the room is the objective
                         else if (type == Type.locked)
@@ -149,12 +149,12 @@ namespace LevelGenerator
                             {
                                 map[iPositive * 2, jPositive * 2] = 102;
                                 target = new Location { X = iPositive * 2, Y = jPositive * 2 };
-                                Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
+                                // Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                             }
                             else
                             {
                                 map[iPositive * 2, jPositive * 2] = 0;
-                                Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
+                                // Debug.Log("[" + iPositive * 2 + " " + jPositive * 2 + "] = " + map[iPositive * 2, jPositive * 2]);
                             }
                         }
                         else
@@ -173,13 +173,13 @@ namespace LevelGenerator
                             {
                                 locksLocation.Add(new Location { X = x, Y = y, Parent = new Location { X = 2 * (parent.X - actualRoom.X) + 2 * iPositive, Y = 2 * (parent.Y - actualRoom.Y) + 2 * jPositive } });
                                 map[x, y] = -(keys.IndexOf(actualRoom.KeyToOpen) + 1);
-                                Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
+                                // Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
                             }
                             //If the connection is open, 100 represents a normal corridor
                             else
                             {
                                 map[x, y] = 100;
-                                Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
+                                // Debug.Log("[" + x + " " + y + "] = " + map[x, y]);
                             }
                         }
                     }
@@ -192,8 +192,10 @@ namespace LevelGenerator
             {
                 allLocksLocation.Add(locked);
             }
-           
 
+
+            // Debug.Log(start.X + ", " + start.Y);
+            // Debug.Log(target.X + ", " + target.Y);
             //start by adding the original position to the open list
             openList.Add(start);
             //While there are rooms to visit in the path
@@ -202,7 +204,7 @@ namespace LevelGenerator
                 // get the square with the lowest F score
                 var lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
-                Debug.Log(current.X + ", "+ current.Y);
+                // Debug.Log(current.X + ", "+ current.Y);
                 //if the current is a key, change the locked door status in the map
                 if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < 100)
                 {
@@ -289,7 +291,7 @@ namespace LevelGenerator
                         // and add it to the open list
                         path.Add(adjacentSquare);
                         openList.Insert(0, adjacentSquare);
-                        Debug.Log(adjacentSquare.X + ", " + adjacentSquare.Y + " = " + adjacentSquare.F);
+                        // Debug.Log(adjacentSquare.X + ", " + adjacentSquare.Y + " = " + adjacentSquare.F);
                     }
                     else
                     {
@@ -305,9 +307,9 @@ namespace LevelGenerator
                     }
                 }
             }
-            Debug.Log(start.X + " " + start.Y );
-            Debug.Log(target.X + " " + target.Y);
-            Debug.Log("Resulting needed locks : " + neededLocks);
+            //Debug.Log(start.X + " " + start.Y );
+            //Debug.Log(target.X + " " + target.Y);
+            //Debug.Log("Resulting needed locks : " + neededLocks);
             return neededLocks;
         }
         //Check what adjacent rooms exits and can be visited and return the valid ones

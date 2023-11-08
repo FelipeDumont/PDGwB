@@ -7,6 +7,6 @@ class RoomFactory
 	public:
 	static std::vector<int> AvailableLockId;
 	static std::vector<int> UsedLockId;
-	static Room CreateRoot();
-	static Room CreateRoom();
+	static Room* CreateRoot();
+	static Room* CreateRoom();
 };

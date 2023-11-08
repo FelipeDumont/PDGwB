@@ -22811,6 +22811,8 @@ MonoBehaviour:
       fitness: -1
   finished: 0
   runOnce: 0
+  createRandomSequenceFileNow: 0
+  randomSequence: 
 --- !u!1 &100564134
 GameObject:
   m_ObjectHideFlags: 0
@@ -46907,6 +46909,8 @@ MonoBehaviour:
       fitness: -1
   finished: 0
   runOnce: 0
+  createRandomSequenceFileNow: 0
+  randomSequence: 
 --- !u!4 &1831925004
 Transform:
   m_ObjectHideFlags: 0

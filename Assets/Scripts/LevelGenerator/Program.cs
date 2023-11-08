@@ -47,12 +47,36 @@ namespace LevelGenerator
             }
 
             aux = dungeons[0];
+
             /*
-            for (int i = 0; i < dungeons[1].RoomList.Count; i++)
+            foreach (Dungeon dun in dungeons)
             {
-                Debug.Log("[" + dungeons[1].RoomList[i].X + ", " + dungeons[1].RoomList[i].Y + "]");
+                Debug.Log("Dungeon DATA: ");
+                foreach(Room r in dun.RoomList)
+                {
+                    Debug.Log(r.X + ", " + r.Y + " = " + r.Type + " || " + r.KeyToOpen);
+                }
+                
             }
             */
+            // Testing !!!
+            //Get every dungeon's fitness
+            float best = float.PositiveInfinity;
+            int bestID = -1;
+            int counter = 0;
+            foreach (Dungeon dun in dungeons)
+            {
+                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                Debug.Log(dun.fitness);
+                if (dun.fitness < best)
+                {
+                    best = dun.fitness;
+                    bestID = counter;
+                }
+                // Debug.Log("F[" + counter + "]= " + dun.fitness);
+                counter += 1;
+            }
+
 
             /*
             //Evolve all the generations from the GA
