@@ -154,6 +154,7 @@ namespace LevelGenerator
          */
         public void RemoveFromGrid(Room cut)
         {
+            // Debug.Log("Remove ... " + cut.RoomId);
             if (cut != null)
             {
                 roomGrid[cut.X, cut.Y] = null;
@@ -182,12 +183,15 @@ namespace LevelGenerator
             bool hasInserted;
             if (newRoom != null)
             {
+                // Debug.Log("Insert ... " + newRoom.RoomId);
                 roomGrid[newRoom.X, newRoom.Y] = newRoom;
                 roomList.Add(newRoom);
                 Room aux = newRoom.LeftChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
+                    // Debug.Log("Check " + aux.RoomId  + ": " + aux.Rotation + " | " + newRoom.RoomId + ": " + newRoom.Rotation);
                     hasInserted = newRoom.ValidateChild(Util.Direction.left, roomGrid);
+                    // Debug.Log("Check " + aux.RoomId + " | " + hasInserted);
                     if (hasInserted)
                     {
                         newRoom.InsertChild(Util.Direction.left, ref aux, ref roomGrid);
@@ -202,6 +206,7 @@ namespace LevelGenerator
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
                     hasInserted = newRoom.ValidateChild(Util.Direction.down, roomGrid);
+                    // Debug.Log("Check " + aux.RoomId + " | " + hasInserted);
                     if (hasInserted)
                     {
                         newRoom.InsertChild(Util.Direction.down, ref aux, ref roomGrid);
@@ -216,6 +221,7 @@ namespace LevelGenerator
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
                     hasInserted = newRoom.ValidateChild(Util.Direction.right, roomGrid);
+                    // Debug.Log("Check " + aux.RoomId + " | " + hasInserted);
                     if (hasInserted)
                     {
                         newRoom.InsertChild(Util.Direction.right, ref aux, ref roomGrid);

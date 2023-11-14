@@ -6,13 +6,17 @@ Room::Room(){
 	Y = 0;
 }
 
-Room::Room(int nX, int nY, int nK, RoomType nT, Room* nP){
+Room::Room(int nX, int nY, int keyToOpen, int id, RoomType nT, Room* nParent){
     
+    if (id == -1)
+		roomId = Constants::getNextId();
+	else
+		roomId = id;
 	X = nX;
 	Y = nY;
-	keyToOpen = nK;
+	keyToOpen = keyToOpen;
 	type = nT;
-	Parent = nP;
+	Parent = nParent;
 }
 
 Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1) {
@@ -31,7 +35,9 @@ Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1
 
 
 Room* Room::Copy() {
-	Room* newRoom = new Room(type, keyToOpen, roomId);
+    // std::cout << "copy room ..."<< ((int)this->type) << std::endl;
+	Room* newRoom = new Room(this->type, this->keyToOpen, this->roomId);
+    // std::cout << "copy room ... A " << std::endl;
 	newRoom->bottomChild = bottomChild;
 	newRoom->leftChild = leftChild;
 	newRoom->rightChild = rightChild;
@@ -39,8 +45,10 @@ Room* Room::Copy() {
 	newRoom->Parent = Parent;
 	newRoom->parentDirection = parentDirection;
 	newRoom->rotation = rotation;
+    // std::cout << "copy room ... B " << std::endl;
 	newRoom->X = X;
 	newRoom->Y = Y;
+    // std::cout << "copy room ... C " << std::endl;
 	return newRoom;
 }
 
@@ -56,18 +64,22 @@ void Room::FixBranch(std::vector<int> specialRooms) {
     actualRoom = this;
     toVisit.push(actualRoom);
     // If both lock and keys are in the branch, give them new ids also, add all the special rooms in the new special rooms list
-    for (auto i = specialRooms.begin(); i != specialRooms.end(); ++i) {
-        for (auto j = std::next(i); j != specialRooms.end(); ++j) {
-            if (*i == -(*j)) {
+    for (int i = 0; i < ((int)specialRooms.size()-1); i++)
+    {
+        for (int j = i+1; j < ((int)specialRooms.size()); j++)
+        {
+            // std::cout << j << std::endl;
+            if(specialRooms[i] == -specialRooms[j]){
                 int aux = Constants::getNextId();
-                if (*i > 0)
-                    *i = aux;
+                if(specialRooms[i] > 0)
+                    specialRooms[i] = aux;
                 else
-                    *i = -aux;
-                *j = -(*i);
+                    specialRooms[i] = -aux;
+                specialRooms[j] = -specialRooms[i];
             }
         }
-        newSpecialRooms.push(*i);
+        
+        newSpecialRooms.push(specialRooms[i]);
     }
     // Add the last special room, which normally wouldn't be added, but only if it exists
     if (!specialRooms.empty())
@@ -79,28 +91,30 @@ void Room::FixBranch(std::vector<int> specialRooms) {
         toVisit.pop();
         visited.push(actualRoom);
         child = actualRoom->leftChild;
+        // std::cout << "Enqueue rooms " << actualRoom->roomId << std::endl;
         if (child != nullptr)
-            if (actualRoom == child->Parent) {
+            if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
         child = actualRoom->bottomChild;
         if (child != nullptr)
-            if (actualRoom == child->Parent) {
+            if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
         child = actualRoom->rightChild;
         if (child != nullptr)
-            if (actualRoom == child->Parent) {
+            if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
     }
 
+    // std::cout << "To place randomly " << visited.size() << " " << newSpecialRooms.size() << std::endl;
     // Try to place all the special rooms in the branch randomly. If the number of remaining rooms is the same as the number of special rooms, every room must be a special one, so we finish this while loop.
     while (visited.size() > newSpecialRooms.size()) {
         actualRoom = visited.front();
         visited.pop();
 
-        int prob = Constants::Next101();
+        int prob = Constants::Next(101);
 
         // If there is a special room left, check the random number and see if it will be placed in the actual room or not
         if (!newSpecialRooms.empty()) {
@@ -237,7 +251,7 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
    return false;
 }
 
-void Room::InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGrid) {
+void Room::InsertChild(Constants::Direction dir, Room* child, RoomGrid roomGrid) {
     Room* roomInGrid;
     int shortcutChance;
     
@@ -329,19 +343,19 @@ void Room::SetParent(Room* parent) {
 
 void Room::FindChildren(std::vector<Room*>& roomList) {
     if (rightChild != nullptr) {
-        if (rightChild->Parent != nullptr && rightChild->Parent == this) {
+        if (rightChild->Parent != nullptr && rightChild->Parent->Equal(this)) {
             roomList.push_back(rightChild);
             rightChild->FindChildren(roomList);
         }
     }
     if (bottomChild != nullptr) {
-        if (bottomChild->Parent != nullptr && bottomChild->Parent == this) {
+        if (bottomChild->Parent != nullptr && bottomChild->Parent->Equal(this)) {
             roomList.push_back(bottomChild);
             bottomChild->FindChildren(roomList);
         }
     }
     if (leftChild != nullptr) {
-        if (leftChild->Parent != nullptr && leftChild->Parent == this) {
+        if (leftChild->Parent != nullptr && leftChild->Parent->Equal(this)) {
             roomList.push_back(leftChild);
             leftChild->FindChildren(roomList);
         }
@@ -356,10 +370,8 @@ bool Room::IsLeafNode() {
 }
 
 bool Room::Equal(Room* other){
-    // return other-> X == this-> X && other->Y == this->Y;
-    return false;
+    return other-> X == this-> X && other->Y == this->Y && other->roomId == roomId && other->depth == depth && other->rotation == rotation;
 }
-
 
 RoomGrid::RoomGrid(){
     grid.resize(Constants::MATRIXOFFSET*2, std::vector<Room*>(Constants::MATRIXOFFSET*2,nullptr));
@@ -378,20 +390,3 @@ void RoomGrid::SetRoom(int x, int y, Room* value){
 
 }
 
-RoomGrid* RoomGrid::Copy(){
-	RoomGrid* newRoomGrid = new RoomGrid(); // Create a new instance of the RoomGrid
-
-        // Copy the contents of the grid
-        for (std::vector<Room*> &row : grid) {
-            std::vector<Room*> newRow;
-            for (Room* room : row) {
-                // Copy the Room object and add it to the new grid
-                // Assuming the Room class has a copy constructor or a clone method
-                Room* newRoom = room->Copy(); 
-                newRow.push_back(newRoom);
-            }
-            newRoomGrid->grid.push_back(newRow);
-        }
-
-        return newRoomGrid;
-}

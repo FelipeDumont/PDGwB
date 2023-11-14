@@ -13,10 +13,8 @@ public:
     float neededRooms;
     int desiredKeys;
     float avgChildren;
-    Boundaries boundaries;
-    Dimensions dimensions;
     std::queue<Room*> toVisit;
-    std::vector<Room> roomList;
+    std::vector<Room*> roomList;
     RoomGrid roomGrid;
     float fitness;
     
@@ -32,20 +30,15 @@ public:
     void RemoveFromGrid(Room* cut);
     
     void GenerateRooms();
-    
-/*
-    void RefreshGrid(Room*& newRoom);
 
+    void RefreshGrid(Room* newRoom);  
+    
     void FixRoomList();
 
     void AddLockAndKey();
 
     void RemoveLockAndKey();
 
-    void SetBoundariesFromRoomList();
-
-    void SetDimensionsFromBoundaries();
-*/
 };
 
 #endif

@@ -173,7 +173,7 @@ MonoBehaviour:
   linearity: 2
   currentSeed: 500
   modifiedVersion: 0
-  GENERATIONS: 0
+  GENERATIONS: 2
   POP_SIZE: 100
   MAX_DEPTH: 0
   useSymmetry: 0
@@ -23465,10 +23465,10 @@ MonoBehaviour:
   nKeys: 1
   nLocks: 1
   linearity: 1.2
-  currentSeed: 200
+  currentSeed: 2
   modifiedVersion: 1
-  GENERATIONS: 0
-  POP_SIZE: 2
+  GENERATIONS: 5
+  POP_SIZE: 4
   MAX_DEPTH: 4
   useSymmetry: 0
   symmetry: 1

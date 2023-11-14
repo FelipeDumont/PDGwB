@@ -91,9 +91,10 @@ namespace LevelGenerator
             //The actual room is the root of the branch
             actualRoom = this;
             toVisit.Enqueue(actualRoom);
+            // Debug.Log("specialRooms Start " + specialRooms.Count);
             //System.Console.WriteLine("Start Conversion");
             //If both lock and keys are in the branch, give them new ids also, add all the special rooms in the new special rooms list
-            for(int i = 0; i < specialRooms.Count-1; ++i)
+            for (int i = 0; i < specialRooms.Count-1; ++i)
             {
                 for(int j = i+1; j < specialRooms.Count; ++j)
                 {
@@ -113,11 +114,13 @@ namespace LevelGenerator
             if(specialRooms.Count > 0)
                 newSpecialRooms.Enqueue(specialRooms[specialRooms.Count-1]);
 
+            // Debug.Log("To visit " + toVisit.Count);
             //Enqueue all the rooms
             while (toVisit.Count > 0)
             {
                 actualRoom = toVisit.Dequeue();
                 visited.Enqueue(actualRoom);
+                // Debug.Log("Enqueue the rooms ... " +  actualRoom.roomId);
                 child = actualRoom.LeftChild;
                 if (child != null)
                     if (actualRoom.Equals(child.Parent))
@@ -138,12 +141,13 @@ namespace LevelGenerator
                     }
             }
 
+            // Debug.Log("To place randomly " + visited.Count + "   " + newSpecialRooms.Count);
             //try to place all the special rooms in the branch randomly. If the number of remaining rooms is the same as the number of special rooms, every room must be a special one, so we finish this while loop.
-            while(visited.Count > newSpecialRooms.Count)
+            while (visited.Count > newSpecialRooms.Count)
             {
                 actualRoom = visited.Dequeue();
 
-                int prob = Util.rnd.Next(101);
+                int prob = Util.Next(101);
                 
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)

@@ -34,16 +34,16 @@ public:
     Constants::Direction parentDirection = Constants::Direction::down;
 
     Room();
-    Room(int nX, int nY, int nK, RoomType nT, Room* nP);
-    
+    Room(int nX, int nY, int keyToOpen, int id, RoomType nT, Room* nParent);
     Room(RoomType roomType, int keyToOpen, int id);
+    
     Room* Copy();
     
     
     void FixBranch(std::vector<int> specialRooms);
     
     bool ValidateChild(Constants::Direction dir, RoomGrid roomGrid);
-    void InsertChild(Constants::Direction dir, Room*& child, RoomGrid& roomGrid);
+    void InsertChild(Constants::Direction dir, Room* child, RoomGrid roomGrid);
     void SetParent(Room* parent);
     void FindChildren(std::vector<Room*>& roomList);
     bool IsLeafNode();
@@ -60,8 +60,6 @@ public:
     RoomGrid();
     Room* GetRoom(int x, int y);
     void SetRoom(int x, int y, Room* value);
-    
-    RoomGrid* Copy();
 };
 
 

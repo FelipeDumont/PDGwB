@@ -38,22 +38,27 @@ namespace LevelGenerator
                 Room actualRoom = toVisit.Dequeue() as Room;
                 Type type;
                 type = actualRoom.Type;
-                if (type == Type.key)
+                if (type == Type.key) {
                     specialRooms.Add(actualRoom.KeyToOpen);
-                else if (type == Type.locked)
+                }
+                else if (type == Type.locked) {
                     specialRooms.Add(-actualRoom.KeyToOpen);
-                if (actualRoom.LeftChild != null)
+                }
+                if (actualRoom.LeftChild != null) {
                     toVisit.Enqueue(actualRoom.LeftChild);
-                if (actualRoom.BottomChild != null)
+                }
+                if (actualRoom.BottomChild != null) {
                     toVisit.Enqueue(actualRoom.BottomChild);
-                if (actualRoom.RightChild != null)
+                }
+                if (actualRoom.RightChild != null) {
                     toVisit.Enqueue(actualRoom.RightChild);
+                }
             }
         }
 
         /**
          * Changes the selected rooms between the parent dungeons
-         * To do so, changes in the parent who is their child to the correspondingo node
+         * To do so, changes in the parent who is their child to the corresponding node
          */
         static public void ChangeChildren(ref Room cut1, ref Room cut2)
         {
@@ -111,28 +116,39 @@ namespace LevelGenerator
                     ind1 = indOriginal1.Copy();
                     ind2 = indOriginal2.Copy();
 
+
                     //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                    roomCut1 = ind1.RoomList[Util.Next(1, ind1.RoomList.Count)];
+                    int cutPosition = Util.Next(1, ind1.RoomList.Count);
+                    // Debug.Log("Cut position " + cutPosition);
+                    roomCut1 = ind1.RoomList[cutPosition];
                     FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
+                    // Debug.Log("R1 = (" + nRooms1 + "," + specialRooms1.Count + ")" + " [" + roomCut1.RoomId + "]");
                     failedRooms = new List<Room>();
 
+                    
                     //While the number of Keys and Locks from a branch is greater than the number of rooms of the other branch,
                     //Redraw the cut point (root of the branch).
                     do
                     {
                         do
                         {
-                            roomCut2 = ind2.RoomList[Util.Next(1, ind2.RoomList.Count)];
+                            int randomID = Util.Next(1, ind2.RoomList.Count);
+                            roomCut2 = ind2.RoomList[randomID];
+                            // Debug.Log("3+ " + roomCut2.RoomId + " | " + failedRooms.Contains(roomCut2));
                         } while (failedRooms.Contains(roomCut2));
                         failedRooms.Add(roomCut2);
                         if (failedRooms.Count == ind2.RoomList.Count - 1)
                             isImpossible = true;
                         FindNKLR(ref nRooms2, ref specialRooms2, roomCut2);
+                        // Debug.Log("Special Check " + nRooms2 + " | " + specialRooms2.Count + " Test " + (specialRooms2.Count > nRooms1) + "||" +(specialRooms1.Count > nRooms2));
                     } while ((specialRooms2.Count > nRooms1 || specialRooms1.Count > nRooms2) && !isImpossible);
+                    // Debug.Log("R2= " + nRooms2);
+                    
                     
                     //Changes the children of the parent's and neighbor's nodes to the node of the other branch if it is not an impossible trade
                     if (!isImpossible)
                     {
+                        
                         try
                         {
                             ChangeChildren(ref roomCut1, ref roomCut2);
@@ -142,6 +158,7 @@ namespace LevelGenerator
                         {
                             throw e;
                         }
+
 
                         //Change the parent of each node
                         Room auxRoom;
@@ -179,17 +196,50 @@ namespace LevelGenerator
                         FindNKLR(ref nRooms2, ref newSpecial2, roomCut2);
                         FindNKLR(ref nRooms1, ref newSpecial1, roomCut1);
                     }
+                    //Debug.Log("Repair ? ("  + (newSpecial1.Count != specialRooms1.Count) + " || " + (newSpecial2.Count != specialRooms2.Count) + " || " +                         (specialRooms1.Count > nRooms2) + " || " + (specialRooms2.Count > nRooms1) + ") && " + !isImpossible);
                     //If in the new branches there are special rooms missing or the number of special rooms is greater then the number of total rooms, retry
                 } while ((newSpecial1.Count != specialRooms1.Count || newSpecial2.Count != specialRooms2.Count || specialRooms1.Count > nRooms2 || specialRooms2.Count > nRooms1) && !isImpossible);
                 //If the crossover can be done, do it. If not, don't.
                 if (!isImpossible)
                 {
-                    //Replace locks and keys in the new branches
+                    
+                    /*
+                    Debug.Log("FIX: ");
+                    foreach (Room r in ind1.RoomList)
+                    {
+                        Debug.Log(r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen);
+                    }
+
+                    Debug.Log("B");
+                    foreach (Room r in ind2.RoomList)
+                    {
+                        Debug.Log(r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen);
+                    }
+                    */
+                    
                     roomCut2.FixBranch(specialRooms1);
+                    // Debug.Log("Current in sequence " + Util.randomSequence.Count);
                     roomCut1.FixBranch(specialRooms2);
+                    // Debug.Log("Current in sequence " + Util.randomSequence.Count);
                     //Fix the list of rooms
+
                     ind1.FixRoomList();
-                    ind2.FixRoomList();       
+                    ind2.FixRoomList();
+
+                    /*
+                    Debug.Log("FIXed: ");
+                    foreach (Room r in ind1.RoomList)
+                    {
+                        Debug.Log(r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen);
+                    }
+
+                    Debug.Log("B");
+                    foreach (Room r in ind2.RoomList)
+                    {
+                        Debug.Log(r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen);
+                    }
+                    */
+
                 }
                 //Make a copy of the individual and finish the crossover
                 indOriginal1 = ind1.Copy();

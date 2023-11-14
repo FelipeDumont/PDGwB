@@ -48,72 +48,40 @@ namespace LevelGenerator
 
             aux = dungeons[0];
 
-            /*
-            foreach (Dungeon dun in dungeons)
-            {
-                Debug.Log("Dungeon DATA: ");
-                foreach(Room r in dun.RoomList)
-                {
-                    Debug.Log(r.X + ", " + r.Y + " = " + r.Type + " || " + r.KeyToOpen);
-                }
-                
-            }
-            */
-            // Testing !!!
-            //Get every dungeon's fitness
-            float best = float.PositiveInfinity;
-            int bestID = -1;
-            int counter = 0;
-            foreach (Dungeon dun in dungeons)
-            {
-                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                Debug.Log(dun.fitness);
-                if (dun.fitness < best)
-                {
-                    best = dun.fitness;
-                    bestID = counter;
-                }
-                // Debug.Log("F[" + counter + "]= " + dun.fitness);
-                counter += 1;
-            }
 
-
-            /*
+            
             //Evolve all the generations from the GA
             for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
             {
+                
                 // Set dfs fitness seeds each generation
-                gaObj.SetDFSSeed();
+                // gaObj.SetDFSSeed();
+
                 //Progress text that can only be used if we do this with threads
                 //TODO: someday, refactor everything to be used in parallel and with threads efficiently
                 if (progressText != null)
                     progressText.text = ((gen + 1) / (float)Constants.GENERATIONS) * 100 + "%";
-                
-                float best = float.PositiveInfinity;
-                int bestID = -1;
-                int counter = 0;
+
 
                 //Get every dungeon's fitness
+                Debug.Log("Generation " + gen + " fitnesses: ");
                 foreach (Dungeon dun in dungeons)
                 {
                     dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                    if(dun.fitness < best)
+                    Debug.Log(dun.fitness);
+                    string data = "";
+                    foreach(Room r in dun.RoomList)
                     {
-                        best = dun.fitness;
-                        bestID = counter;
+                        data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                     }
-                    counter += 1;
+                    Debug.Log(data);
+                    
+                    
                 }
 
                 //Elitism = save the best solution?
                 // is allways selecting the first one ...
                 aux = dungeons[0];
-
-                // Real elitism
-                if (Constants.modified == true)
-                {
-                    aux = dungeons[bestID];
-                }
 
                 foreach (Dungeon dun in dungeons)
                 {
@@ -130,73 +98,70 @@ namespace LevelGenerator
                 List<Dungeon> childPop = new List<Dungeon>(dungeons.Count);
                 for (int i = 0; i < (dungeons.Count / 2); ++i)
                 {
+                    
+                    
                     int parentIdx1 = 0, parentIdx2 = 1;
                     GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2);
+                    // Debug.Log(parentIdx1 + " | " + parentIdx2);
+                    
                     Dungeon parent1 = dungeons[parentIdx1].Copy();
                     Dungeon parent2 = dungeons[parentIdx2].Copy();
 
+                    
                     try
                     {
+                        // Debug.Log("Pre Evolution seedID? " + Util.randomSequence.Count);
                         GA.Crossover(ref parent1, ref parent2);
+                        // Debug.Log("Post Cross seedID?" + Util.randomSequence.Count);
 
-                        aux = dungeons[0];
+                        /*
                         GA.Mutation(ref parent1);
                         GA.Mutation(ref parent2);
+                        */
+                        
+
                         //We need to fix the room list anytime a room is altered in the tree.
                         parent1.FixRoomList();
                         parent2.FixRoomList();
+                        
+
                     }
                     catch (System.Exception e)
                     {
                         Debug.Log(e.Message);
                         Util.OpenUri("https://stackoverflow.com/search?q=" + e.Message);
                     }
+
+                    
                     //Calculate the average number of children from the rooms in each children
                     parent1.CalcAvgChildren();
                     parent2.CalcAvgChildren();
                     //Add the children to the new population
                     childPop.Add(parent1);
                     childPop.Add(parent2);
+                    
                 }
 
-                
-                if (Constants.modified == true)
-                {
-                    //Elitism - with the worst one !!!
-                    float worst = float.NegativeInfinity;
-                    int worstId = -1;
-                    counter = 0;
-                    foreach (Dungeon dun in dungeons)
-                    {
-                        dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                        if (dun.fitness > worst)
-                        {
-                            worst = dun.fitness;
-                            worstId = counter;
-                        }
-                        counter += 1;
-                    }
-                    childPop[worstId] = aux;
-                }
-                else
-                {
-                    //Elitism - now we get back the best one to the first position
-                    childPop[0] = aux;
-                }
+
+                childPop[0] = aux;
                 dungeons = childPop;
-
             }
             //Find the best individual in the final population and print it as the answer
             min = Double.MaxValue;
-
-            
             aux = dungeons[0];
-            
-            
+
+            Debug.Log("Final Results: ");
             foreach (Dungeon dun in dungeons)
             {
-                float actual = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                dun.fitness = actual;
+                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                Debug.Log(dun.fitness);
+                string data = "";
+                foreach (Room r in dun.RoomList)
+                {
+                    data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
+                }
+                Debug.Log(data);
+
                 fitnessValues.Add(dun.fitness);
 
                 if (min > actual)
@@ -205,26 +170,12 @@ namespace LevelGenerator
                     aux = dun.Copy();
                 }
             }
-            */
+            
             watch.Stop();
             long time = watch.ElapsedMilliseconds;
             Debug.Log("Total time " + time/1000f);
 
             hasFinished = true;
-
-            //Saves the test file that we used in the master thesis
-            //CSVManager.SaveCSVLevel(id, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, time, Constants.RESULTSFILE+"-"+Constants.nV+"-" + Constants.nK + "-" + Constants.nL + "-" + Constants.lCoef + ".csv");
-
-            //Print info from best level if needed
-            /*Debug.Log("Finished - fitnes:" + aux.fitness);
-            Debug.Log("R:"+ aux.RoomList.Count+"-K:" + aux.nKeys + "-L:"+ aux.nLocks + "-Lin:"+aux.AvgChildren +"-nL:"+aux.neededLocks+"-nR:"+aux.neededRooms);
-            Debug.Log("nRdelta:"+System.Math.Abs(aux.RoomList.Count * 0.8f - aux.neededRooms)+"-80p:"+ aux.RoomList.Count * 0.8f);*/
-
-            //This method prints the dungeon in the console (not unity's one) AND saves it into a file!
-            // Interface.PrintNumericalGridWithConnections(aux);
-
-            //We should clear the dungeons... but Game Manager is using aux. So we could and should do a hard copy. But i'm not touching that spaghetti right now
-            //TODO: touch spaghetti later
             // TODO THIS WAS DONE, REMOVED FOR TESTING
             // dungeons.Clear();
             

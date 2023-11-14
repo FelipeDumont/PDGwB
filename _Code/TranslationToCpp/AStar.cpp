@@ -50,25 +50,25 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
         maxY = -matrixOffset;
 
         // Check all the rooms and add them to the keys and locks lists if they are one of them
-        for (Room room : dun.roomList) {
-            if (room.type == RoomType::key) {
-                keys.push_back(room.keyToOpen);
+        for (Room* room : dun.roomList) {
+            if (room->type == RoomType::key) {
+                keys.push_back(room->keyToOpen);
                 // std::cout << "adding Key [ " << room.keyToOpen << "]" <<std::endl;
             }
-            if (room.type == RoomType::locked) {
-                lockedRooms.push_back(room.keyToOpen);
+            if (room->type == RoomType::locked) {
+                lockedRooms.push_back(room->keyToOpen);
                 // std::cout << "adding lock [" << room.keyToOpen << "]"<< std::endl;
             }
 
             // Check the boundaries of the farthest rooms in the grid
-            if (room.X < minX)
-                minX = room.X;
-            if (room.Y < minY)
-                minY = room.Y;
-            if (room.X > maxX)
-                maxX = room.X;
-            if (room.Y > maxY)
-                maxY = room.Y;
+            if (room->X < minX)
+                minX = room->X;
+            if (room->Y < minY)
+                minY = room->Y;
+            if (room->X > maxX)
+                maxX = room->X;
+            if (room->Y > maxY)
+                maxY = room->Y;
         }
 
         // The starting location is room (0,0)

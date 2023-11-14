@@ -5,13 +5,9 @@
 
 
 Dungeon::Dungeon() {
-	while (!toVisit.empty()) {
-		toVisit.pop();
-	}
 	roomList.clear();
     Room* root = RoomFactory::CreateRoot();
-	roomList.push_back(*root);
-	toVisit.push(root);
+	roomList.push_back(root);
     
     roomGrid.SetRoom(0,0,root);
 	
@@ -21,37 +17,59 @@ Dungeon::Dungeon() {
 }
 
 Dungeon* Dungeon::Copy() {
-    std::cout << "copying ... Dungeon" << std::endl;
+    
     Dungeon* copyDungeon;
     copyDungeon = new Dungeon();
-    copyDungeon->toVisit = std::queue<Room*>(toVisit);
-    copyDungeon->roomList = std::vector<Room>(roomList);
-    copyDungeon->roomGrid = *roomGrid.Copy();
+    copyDungeon->roomList.clear();
     copyDungeon->nKeys = nKeys;
     copyDungeon->nLocks = nLocks;
     copyDungeon->desiredKeys = desiredKeys;
     copyDungeon->avgChildren = avgChildren;
     copyDungeon->fitness = fitness;
+
+    
     
     Room* aux;
-    for (Room oldRoom : roomList) {
-        aux = new Room(oldRoom);
-        copyDungeon->roomList.push_back(*aux);
-        copyDungeon->roomGrid.SetRoom(oldRoom.X,oldRoom.Y, aux);
+
+    // First create all the rooms
+    for (Room* oldRoom : roomList) {
+        // aux = new Room(oldRoom->X, oldRoom->Y, oldRoom->keyToOpen, oldRoom->roomId, oldRoom->type, nullptr); 
+        aux = oldRoom->Copy();
+        copyDungeon->roomList.push_back(aux);
+        copyDungeon->roomGrid.SetRoom(oldRoom->X,oldRoom->Y, aux);
     }
+    // Deep copy with their inner links !
+    for (Room* oldRoom : roomList) {
+        // deep copy issue !
+        Room* copyRoom = copyDungeon->roomGrid.GetRoom(oldRoom->X,oldRoom->Y);
+        if(oldRoom->Parent != nullptr){
+            copyRoom->Parent = copyDungeon->roomGrid.GetRoom(oldRoom->Parent->X, oldRoom->Parent->Y);
+        }
+        if(oldRoom->leftChild != nullptr){
+            copyRoom->leftChild = copyDungeon->roomGrid.GetRoom(oldRoom->leftChild->X, oldRoom->leftChild->Y);
+        }
+        if(oldRoom->rightChild != nullptr){
+            copyRoom->rightChild = copyDungeon->roomGrid.GetRoom(oldRoom->rightChild->X, oldRoom->rightChild->Y);
+        }
+        if(oldRoom->bottomChild != nullptr){
+            copyRoom->bottomChild = copyDungeon->roomGrid.GetRoom(oldRoom->bottomChild->X, oldRoom->bottomChild->Y);
+        }
+    }
+    // std::cout << "final size ??? to visit queue: [" << toVisit.size() << " | " << copyDungeon->toVisit.size() << "]" << std::endl;
+
     // Need to use the grid to copy the neighbors, children, and parent
-    for (Room newRoom : copyDungeon->roomList) {
-        if (newRoom.Parent != nullptr) {
-            newRoom.Parent = copyDungeon->roomGrid.GetRoom(newRoom.Parent->X,newRoom.Parent->Y);
+    for (Room* newRoom : copyDungeon->roomList) {
+        if (newRoom->Parent != nullptr) {
+            newRoom->Parent = copyDungeon->roomGrid.GetRoom(newRoom->Parent->X,newRoom->Parent->Y);
         }
-        if (newRoom.rightChild != nullptr) {
-            newRoom.rightChild = copyDungeon->roomGrid.GetRoom(newRoom.rightChild->X,newRoom.rightChild->Y);
+        if (newRoom->rightChild != nullptr) {
+            newRoom->rightChild = copyDungeon->roomGrid.GetRoom(newRoom->rightChild->X,newRoom->rightChild->Y);
         }
-        if (newRoom.bottomChild != nullptr) {
-            newRoom.bottomChild = copyDungeon->roomGrid.GetRoom(newRoom.bottomChild->X,newRoom.bottomChild->Y);
+        if (newRoom->bottomChild != nullptr) {
+            newRoom->bottomChild = copyDungeon->roomGrid.GetRoom(newRoom->bottomChild->X,newRoom->bottomChild->Y);
         }
-        if (newRoom.leftChild != nullptr) {
-            newRoom.leftChild = copyDungeon->roomGrid.GetRoom(newRoom.leftChild->X,newRoom.leftChild->Y);
+        if (newRoom->leftChild != nullptr) {
+            newRoom->leftChild = copyDungeon->roomGrid.GetRoom(newRoom->leftChild->X,newRoom->leftChild->Y);
         }
     }
     return copyDungeon;
@@ -61,13 +79,13 @@ void Dungeon::CalcAvgChildren() {
     avgChildren = 0.0f;
     int childCount;
     int childLess = 0;
-    for (Room room : roomList) {
+    for (Room* room : roomList) {
         childCount = 0;
-        if (room.rightChild != nullptr && room.rightChild->Parent != nullptr)
+        if (room->rightChild != nullptr && room->rightChild->Parent != nullptr)
             childCount += 1;
-        if (room.leftChild != nullptr && room.leftChild->Parent != nullptr)
+        if (room->leftChild != nullptr && room->leftChild->Parent != nullptr)
             childCount += 1;
-        if (room.bottomChild != nullptr && room.bottomChild->Parent != nullptr)
+        if (room->bottomChild != nullptr && room->bottomChild->Parent != nullptr)
             childCount += 1;
         if (childCount == 0)
             childLess++;
@@ -79,6 +97,7 @@ void Dungeon::CalcAvgChildren() {
 void Dungeon::GenerateRooms() {
 
     int prob;
+    toVisit.push(roomList[0]);
     while (!toVisit.empty()) {
         Room* actualRoom = toVisit.front();
         toVisit.pop();
@@ -92,18 +111,18 @@ void Dungeon::GenerateRooms() {
         }	
                 
         // Comprobar cuántos hijos tendrá el nodo, si los tiene.
-        prob = Constants::Next100();
+        prob = Constants::Next(100);
         // std::cout << "GenerateRooms A (prob)" << prob << std::endl;
         // La probabilidad de que el nodo padre tenga hijos es del 100%, luego, en cada altura, se añade un 10% de probabilidad de que NO tenga hijos.
         // Si un nodo tiene un hijo, se crea con RoomFactory, se inserta como hijo del nodo actual en el lugar correcto
         // También se encola para ser visitado más tarde y se agrega a la lista de habitaciones de este calabozo.
         if (prob <= (Constants::PROB_HAS_CHILD * (1 - actualDepth / (Constants::MAX_DEPTH + 1)))) {
             Room* child = new Room(RoomType::normal, -1, 0);
-            int prob = Constants::Next3();
+            int prob = Constants::Next(3);
             // std::cout << "GenerateRooms B (dir)" << prob << std::endl;
             Constants::Direction dir = static_cast<Constants::Direction>(prob);
 
-            prob = Constants::Next101();
+            prob = Constants::Next(101);
             // std::cout << "GenerateRooms C (prob)" << prob << std::endl;
             if (prob < Constants::PROB_1_CHILD) {
                 // Enqueue internamente
@@ -113,7 +132,7 @@ void Dungeon::GenerateRooms() {
                 InstantiateRoom(child, actualRoom, dir);
                 Constants::Direction dir2;
                 do {
-                    prob = Constants::Next3();
+                    prob = Constants::Next(3);
                     // std::cout << "GenerateRooms D (dir)" << prob << std::endl;
                     dir2 = static_cast<Constants::Direction>(prob);
                 } while (dir == dir2);
@@ -126,6 +145,7 @@ void Dungeon::GenerateRooms() {
         }
             
     }
+
     nKeys = RoomFactory::AvailableLockId.size() + RoomFactory::UsedLockId.size();
 	nLocks = RoomFactory::UsedLockId.size();
 }
@@ -138,20 +158,21 @@ void Dungeon::InstantiateRoom(Room* child, Room* actualRoom, Constants::Directio
 		Room* newRoom = RoomFactory::CreateRoom();
 		child = newRoom;
 		actualRoom->InsertChild(dir, child, roomGrid);
+        //std::cout<< "inserting child [" << actualRoom->X << ", " << actualRoom->Y << "] = " << (actualRoom->Parent == nullptr) << " | " << (actualRoom->leftChild == nullptr) << (actualRoom->bottomChild == nullptr) << (actualRoom->rightChild == nullptr) << std::endl;
 		child->parentDirection = dir;
 		toVisit.push(child);
-		roomList.push_back(*child);
+		roomList.push_back(child);
 		roomGrid.SetRoom(child->X,child->Y,child);
 	}
 }
 
-/*
 
 
 void Dungeon::RemoveFromGrid(Room* cut) {
+    // std::cout << "try to remove " << cut->roomId << std::endl;
     if (cut != nullptr) {
-        roomGrid.grid[cut->X][cut->Y] = nullptr;
-        roomList.erase(std::remove(roomList.begin(), roomList.end(), *cut), roomList.end());
+        // std::cout << "LBR [" << (cut->leftChild != nullptr)<< "," << (cut->bottomChild != nullptr) << ", " << (cut->rightChild != nullptr) << "]"<< std::endl;
+        // Look at their childs !
         if (cut->leftChild != nullptr && cut->leftChild->Parent != nullptr && cut->leftChild->Parent->Equal(cut)) {
             RemoveFromGrid(cut->leftChild);
         }
@@ -162,9 +183,209 @@ void Dungeon::RemoveFromGrid(Room* cut) {
         if (cut->rightChild != nullptr && cut->rightChild->Parent != nullptr && cut->rightChild->Parent->Equal(cut)) {
             RemoveFromGrid(cut->rightChild);
         }
+        
+        // Clean them then ...
+        roomGrid.SetRoom(cut->X, cut->Y, nullptr);
+        // Finding the room with a specific roomID and erasing it from roomList
+        auto it = std::find_if(roomList.begin(), roomList.end(),
+                               [cut](Room* room) { return room->Equal(cut); });
+        if (it != roomList.end()) {
+            roomList.erase(it);
+        }
     }
 }
-*/
+
+void Dungeon::RefreshGrid(Room* newRoom) {
+    bool hasInserted;
+    if (newRoom != nullptr) {
+        // std::cout << "Insert it all !!!" << newRoom->roomId << std::endl;
+        roomGrid.SetRoom(newRoom->X,newRoom->Y,newRoom);
+        roomList.push_back(newRoom);
+        Room* aux = newRoom->leftChild;
+        if (aux != nullptr && aux->Parent != nullptr && aux->Parent->Equal(newRoom)) {
+            // std::cout << "Check " << aux->roomId << ": " << aux->rotation << " | " << newRoom->roomId << ": " << newRoom->rotation << std::endl;
+            hasInserted = newRoom->ValidateChild(Constants::Direction::left, roomGrid);
+            if (hasInserted) {
+                newRoom->InsertChild(Constants::Direction::left, aux, roomGrid);
+                RefreshGrid(aux);
+            } else {
+                newRoom->leftChild = nullptr;
+            }
+        }
+        aux = newRoom->bottomChild;
+        if (aux != nullptr && aux->Parent != nullptr && aux->Parent->Equal(newRoom)) {
+            // std::cout << "Check " << aux->roomId << ": " << aux->rotation << " | " << newRoom->roomId << ": " << newRoom->rotation << std::endl;
+            hasInserted = newRoom->ValidateChild(Constants::Direction::down, roomGrid);
+            if (hasInserted) {
+                newRoom->InsertChild(Constants::Direction::down, aux, roomGrid);
+                RefreshGrid(aux);
+            } else {
+                newRoom->bottomChild = nullptr;
+            }
+        }
+        aux = newRoom->rightChild;
+        if (aux != nullptr && aux->Parent != nullptr && aux->Parent->Equal(newRoom)) {
+            // std::cout << "Check " << aux->roomId << ": " << aux->rotation << " | " << newRoom->roomId << ": " << newRoom->rotation << std::endl;
+            hasInserted = newRoom->ValidateChild(Constants::Direction::right, roomGrid);
+            if (hasInserted) {
+                newRoom->InsertChild(Constants::Direction::right, aux, roomGrid);
+                RefreshGrid(aux);
+            } else {
+                newRoom->rightChild = nullptr;
+            }
+        }
+    }
+}
+void Dungeon::AddLockAndKey() {
+
+    Room* actualRoom;
+    Room* child;
+    actualRoom = roomList[0];
+    std::queue<Room*> toVisit;
+    toVisit.push(actualRoom);
+    bool hasKey = false;
+    bool hasLock = false;
+    int lockId = -1;
+
+    while (!toVisit.empty() && !hasLock) {
+        actualRoom = toVisit.front();
+        toVisit.pop();
+        if (actualRoom->type == RoomType::normal && actualRoom->Equal(roomList[0]) != true) {
+            if (Constants::Next(101) <= Constants::PROB_KEY_ROOM + Constants::PROB_LOCKER_ROOM) {
+                if (!hasKey) {
+                    (*actualRoom).type = RoomType::key;
+                    (*actualRoom).roomId = Constants::getNextId();
+                    (*actualRoom).keyToOpen = actualRoom->roomId;
+                    lockId = actualRoom->roomId;
+                    hasKey = true;
+                    roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                } else {
+                    (*actualRoom).type = RoomType::locked;
+                    (*actualRoom).keyToOpen = lockId;
+                    hasLock = true;
+                    roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                }
+            }
+        }
+        child = actualRoom->leftChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->bottomChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->rightChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+    }
+}
+
+void Dungeon::RemoveLockAndKey() {
+    int removeKey = Constants::Next(nKeys);
+    int removeLock = removeKey;
+    Room* actualRoom;
+    Room* child;
+    actualRoom = roomList[0];
+    std::queue<Room*>toVisit;
+    toVisit.push(actualRoom);
+    bool hasKey = false;
+    bool hasLock = false;
+    int lockId = -1;
+    int keyCount = 0;
+
+
+    std::cout << "Obtain the room list key (ID)" << std::endl;
+    for (Room* r : roomList) {
+        if (r->type == RoomType::key) {
+            if (removeKey == keyCount)
+                lockId = r->roomId;
+            keyCount++;
+        }
+    }
+
+    std::cout << "Check all the nodes that relate to said key (until the key is found and remove !)" << std::endl;
+    while (!toVisit.empty() && (!hasKey)) {
+        actualRoom = toVisit.front();
+        toVisit.pop();
+        if (actualRoom->type == RoomType::key) {
+            if (actualRoom->roomId == lockId) {
+                (*actualRoom).type = RoomType::normal;
+                (*actualRoom).keyToOpen = -1;
+                lockId = actualRoom->roomId;
+                roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                hasKey = true;
+            }
+        }
+        child = actualRoom->leftChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->bottomChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->rightChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+    }
+    std::cout << "C" << std::endl;
+    actualRoom = roomList[0];
+    toVisit = std::queue<Room*>();
+    toVisit.push(actualRoom);
+
+    while (!toVisit.empty() && !hasLock) {
+        actualRoom = toVisit.front();
+        toVisit.pop();
+        if (actualRoom->type == RoomType::locked) {
+            if (actualRoom->keyToOpen == lockId) {
+                (*actualRoom).type = RoomType::normal;
+                (*actualRoom).keyToOpen = -1;
+                hasLock = true;
+            }
+        }
+        child = actualRoom->leftChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->bottomChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->rightChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+    }
+
+    nKeys -= hasKey ? 1 : 0;
+    nLocks -= hasLock ? 1 : 0;
+}
+
+void Dungeon::FixRoomList() {
+        std::queue<Room*> toVisit;
+        toVisit.push( roomList[0]);
+        nKeys = 0;
+        nLocks = 0;
+        roomList.clear();
+        while (!toVisit.empty()) {
+            Room* actualRoom = toVisit.front();
+            toVisit.pop();
+            roomList.push_back(actualRoom);
+            if (actualRoom->type == RoomType::key)
+                nKeys++;
+            else if (actualRoom->type == RoomType::locked)
+                nLocks++;
+            if (actualRoom->leftChild != nullptr)
+                toVisit.push(actualRoom->leftChild);
+            if (actualRoom->bottomChild != nullptr)
+                toVisit.push(actualRoom->bottomChild);
+            if (actualRoom->rightChild != nullptr)
+                toVisit.push(actualRoom->rightChild);
+        }
+    }
 
 
 

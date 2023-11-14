@@ -23,7 +23,7 @@ Room* RoomFactory::CreateRoom()
     int keyToOpen;
     // int lockId;
     Room* room;
-    int prob = Constants::Next101();
+    int prob = Constants::Next(101);
     // std::cout << "CreateRoom (prob) " << prob << std::endl;
     // If there are too many keys without locks, raises the chance to create a lock
     if (AvailableLockId.size() > 0)

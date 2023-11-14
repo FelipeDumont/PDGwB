@@ -17,7 +17,8 @@ class GA {
 public:
     int FirstTest();
     void ReadSequence(std::string fileName);
-    float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
+    float Fitness(std::vector<int> specialRooms, Room *root, int *nRooms, int *specialCount) ;
+    std::vector<int>  FindNKLR(Room *root, int *nRooms, int *specialCount);
     std::vector<Dungeon> CreateDungeon();
     std::vector<Dungeon> GenerateDungeon();
 };
