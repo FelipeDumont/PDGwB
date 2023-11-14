@@ -33,11 +33,16 @@ Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1
 		this->keyToOpen = keyToOpen;
 }
 
+Room::~Room(){
+    // Clean the Room 
+    if (Parent != nullptr) delete Parent;
+    if (leftChild != nullptr) delete leftChild;
+    if (rightChild != nullptr) delete rightChild;
+    if (bottomChild != nullptr) delete bottomChild;
+}
 
 Room* Room::Copy() {
-    // std::cout << "copy room ..."<< ((int)this->type) << std::endl;
 	Room* newRoom = new Room(this->type, this->keyToOpen, this->roomId);
-    // std::cout << "copy room ... A " << std::endl;
 	newRoom->bottomChild = bottomChild;
 	newRoom->leftChild = leftChild;
 	newRoom->rightChild = rightChild;
@@ -45,10 +50,9 @@ Room* Room::Copy() {
 	newRoom->Parent = Parent;
 	newRoom->parentDirection = parentDirection;
 	newRoom->rotation = rotation;
-    // std::cout << "copy room ... B " << std::endl;
 	newRoom->X = X;
 	newRoom->Y = Y;
-    // std::cout << "copy room ... C " << std::endl;
+    
 	return newRoom;
 }
 

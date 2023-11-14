@@ -36,6 +36,7 @@ public:
     Room();
     Room(int nX, int nY, int keyToOpen, int id, RoomType nT, Room* nParent);
     Room(RoomType roomType, int keyToOpen, int id);
+    ~Room();
     
     Room* Copy();
     

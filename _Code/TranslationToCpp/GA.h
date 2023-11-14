@@ -9,18 +9,28 @@
 #include <random>
 #include <fstream>
 #include <string>
-#include <vector>
-#include <iostream>
-#include <limits>
+#include <unordered_set>
+#include <algorithm>
+#include <chrono>
 
 class GA {
 public:
-    int FirstTest();
-    void ReadSequence(std::string fileName);
-    float Fitness(std::vector<int> specialRooms, Room *root, int *nRooms, int *specialCount) ;
+    bool testingMode;;
+    enum class MutationOp { insertChild, removeLeaf };
+    float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
     std::vector<int>  FindNKLR(Room *root, int *nRooms, int *specialCount);
-    std::vector<Dungeon> CreateDungeon();
+    std::vector<Dungeon*> CreateDungeon();
     std::vector<Dungeon> GenerateDungeon();
+
+    void Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2);
+    void ChangeChildren(Room* cut1, Room* cut2);
+    void Crossover(Dungeon* indOriginal1, Dungeon* indOriginal2);
+    void Mutation(Dungeon* dun);
+
+    // Testing
+    void ReadSequence(std::string fileName);
+    int Testing(); // OLD int main()
+    void FirstTest();
 };
 
-#endif 
+#endif

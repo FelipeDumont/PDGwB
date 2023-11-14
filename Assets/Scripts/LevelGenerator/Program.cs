@@ -47,9 +47,9 @@ namespace LevelGenerator
             }
 
             aux = dungeons[0];
+            // Constants.GENERATIONS = 0;
 
 
-            
             //Evolve all the generations from the GA
             for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
             {
@@ -64,10 +64,11 @@ namespace LevelGenerator
 
 
                 //Get every dungeon's fitness
-                Debug.Log("Generation " + gen + " fitnesses: ");
+                // Debug.Log("Generation " + gen + " fitnesses: ");
                 foreach (Dungeon dun in dungeons)
                 {
                     dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                    /*
                     Debug.Log(dun.fitness);
                     string data = "";
                     foreach(Room r in dun.RoomList)
@@ -75,8 +76,7 @@ namespace LevelGenerator
                         data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                     }
                     Debug.Log(data);
-                    
-                    
+                    */
                 }
 
                 //Elitism = save the best solution?
@@ -114,10 +114,10 @@ namespace LevelGenerator
                         GA.Crossover(ref parent1, ref parent2);
                         // Debug.Log("Post Cross seedID?" + Util.randomSequence.Count);
 
-                        /*
+                        
                         GA.Mutation(ref parent1);
                         GA.Mutation(ref parent2);
-                        */
+                        
                         
 
                         //We need to fix the room list anytime a room is altered in the tree.
@@ -150,10 +150,11 @@ namespace LevelGenerator
             min = Double.MaxValue;
             aux = dungeons[0];
 
-            Debug.Log("Final Results: ");
+            // Debug.Log("Final Results: ");
             foreach (Dungeon dun in dungeons)
             {
                 dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                
                 Debug.Log(dun.fitness);
                 string data = "";
                 foreach (Room r in dun.RoomList)
@@ -161,6 +162,7 @@ namespace LevelGenerator
                     data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                 }
                 Debug.Log(data);
+                
 
                 fitnessValues.Add(dun.fitness);
 

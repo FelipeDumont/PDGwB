@@ -19,7 +19,7 @@ public:
     float fitness;
     
     Dungeon();
-
+    ~Dungeon();
 
     Dungeon* Copy();
 
