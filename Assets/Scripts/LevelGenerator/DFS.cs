@@ -14,19 +14,28 @@ namespace LevelGenerator
         }
 
         //The DFS Algorithm
-        public int FindRoute(int seed)
+        public int FindRoute()
         {
             //Puts the starting node in the list of open nodes and in the path
             openList.Add(start);
             path.Add(start);
 
-            // Assign random 
-            Random rand = new Random(seed);
             //Visit all open nodes until none is left
             while (openList.Count > 0)
             {
+                
+                string so = "";
+                foreach (Location loc in openList)
+                {
+                    so += "[" + loc.X + ", " + loc.Y + "] \n";
+                }
+
+                UnityEngine.Debug.Log(so);
+                
+
                 // get the first
                 current = openList.First();
+                UnityEngine.Debug.Log("DFS current [" + current.X + ", " + current.Y + "] to [" + target.X + ", " + target.Y + "]" );
                 //Handles key rooms and their locks, if it is one
                 validateKeyRoom(current);
 
@@ -57,11 +66,33 @@ namespace LevelGenerator
                 //Check all adjacent squares from the curret node
                 var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y, sizeX, sizeY, map);
 
-                //Adds the adjacent squares in a random order
-                // TODO LOOK AT THIS
-                // rand = new Random();
-                adjacentSquares = adjacentSquares.OrderBy(X => rand.Next()).ToList();
- 
+                //Adds the adjacent squares in a random order (changed to be the same in c++)
+                //UnityEngine.Debug.Log(Util.randomSequence.Count  + " " + adjacentSquares.Count);
+                // adjacentSquares = adjacentSquares.OrderBy(X => Util.Next(adjacentSquares.Count)).ToList();
+                // Shuffle using Fisher-Yates shuffle
+                string randoms = "";
+                for (int i = adjacentSquares.Count - 1; i > 0; i--)
+                {
+                    int j = Util.Next(0, i + 1);
+                    Location temp = adjacentSquares[i];
+                    adjacentSquares[i] = adjacentSquares[j];
+                    adjacentSquares[j] = temp;
+
+                    randoms += j + "\n";
+                }
+
+                UnityEngine.Debug.Log("Randoms: " + (adjacentSquares.Count - 1) +  ":" + randoms);
+                /*
+                string s = "";
+                foreach (Location loc in adjacentSquares)
+                {
+                    s += "[" + loc.X + ", " + loc.Y +"] \n";
+                }
+                
+                UnityEngine.Debug.Log(s);
+                */
+                // UnityEngine.Debug.Log(Util.randomSequence.Count);
+
 
                 foreach (var adjacentSquare in adjacentSquares)
                 {
@@ -72,6 +103,7 @@ namespace LevelGenerator
                     }
                 }
 
+                UnityEngine.Debug.Log("Adjacent size " + adjacentSquares.Count);
                 foreach (var adjacentSquare in adjacentSquares)
                 {
                     // if this adjacent square is already in the closed list, ignore it
@@ -83,9 +115,11 @@ namespace LevelGenerator
                     if (openList.FirstOrDefault(l => l.X == adjacentSquare.X
                             && l.Y == adjacentSquare.Y) == null)
                     {
+
                         adjacentSquare.Parent = current;
 
                         // and add it to the open list and add to your path
+                        // UnityEngine.Debug.Log("adding " + adjacentSquare);
                         openList.Insert(0, adjacentSquare);
                         path.Add(adjacentSquare);
                     }
@@ -95,18 +129,6 @@ namespace LevelGenerator
                     }
                 }
             }
-
-            /*while (current != null)
-            {
-                Console.SetCursorPosition(60+current.Y + 20, current.X);
-                Console.Write('_');
-                Console.SetCursorPosition(60+current.Y + 20, current.X);
-                current = current.Parent;
-                System.Threading.Thread.Sleep(2);
-            }*/
-
-            // PrintPathFound(current);
-            //PrintPathFinding(path, 200);
             return NeededLocks;
         }
     }

@@ -22,6 +22,9 @@ int Constants::getNextId(){
 }
 
 int Constants::Next(int maxValue) {
+	if(maxValue == 0){
+		maxValue += 1;
+	}
     std::uniform_int_distribution<int> distribution(0, maxValue - 1);
 	int result = distribution(randGen);
 	if(isForced){
@@ -41,16 +44,5 @@ int Constants::Next(int minValue, int maxValue) {
     return result;
 }
 
-/*
-int Constants::SelectRandom(int value){
-	randomSequence.push_back(value);
-	if(isForced){
-		value =forcedRandomSequence[currentValue];
-		currentValue += 1;
-	}
-	// std::cout << randomSequence.size() << ": " << value << "\n";
-	return value;
-}
-*/
 
 	

@@ -3,6 +3,13 @@
 #include "GA.h"
 #include <cstdlib> // For std::stoi and std::stof
 
+extern "C" { 
+	int Add(int a, int b)
+	{
+	    return a + b;
+	}
+}
+
 
 int main(int argc, char* argv[]){
 
@@ -25,12 +32,13 @@ int main(int argc, char* argv[]){
         // Assign internally
         ga.testingMode = testingMode;
 
-        std::cout << argv[11] << std::endl;
         // Finally we check the random sequence
         if(argc == 13 && useForceRandomSequence){
             std::string fileName = argv[12];// "RandomSequence.txt";
             ga.ReadSequence(fileName);
-            std::cout << "Values assigned ??? "<< Constants::forcedRandomSequence.size()<< std::endl;
+            if(testingMode){
+                std::cout << "Values assigned ??? "<< Constants::forcedRandomSequence.size()<< std::endl;
+            }
         }
 
         // Start For real !
@@ -47,5 +55,4 @@ int main(int argc, char* argv[]){
         std::cout << "Wrong quantity of Arguments !";
     }
     return 0;
-
 }

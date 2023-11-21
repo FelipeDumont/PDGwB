@@ -120,7 +120,7 @@ namespace LevelGenerator
             {
                 actualRoom = toVisit.Dequeue();
                 visited.Enqueue(actualRoom);
-                // Debug.Log("Enqueue the rooms ... " +  actualRoom.roomId);
+                // Debug.Log("Enqueue the rooms ... " +  actualRoom.x  + ", " + actualRoom.y + "(" + (actualRoom.LeftChild == null) + " " + (actualRoom.rightChild == null) + " " + (actualRoom.bottomChild == null) + ")");
                 child = actualRoom.LeftChild;
                 if (child != null)
                     if (actualRoom.Equals(child.Parent))
@@ -141,14 +141,15 @@ namespace LevelGenerator
                     }
             }
 
-            // Debug.Log("To place randomly " + visited.Count + "   " + newSpecialRooms.Count);
+            // Debug.Log("To place randomly " + visited.Count + "   " + newSpecialRooms.Count + " | " + Util.randomSequence.Count);
             //try to place all the special rooms in the branch randomly. If the number of remaining rooms is the same as the number of special rooms, every room must be a special one, so we finish this while loop.
             while (visited.Count > newSpecialRooms.Count)
             {
                 actualRoom = visited.Dequeue();
 
                 int prob = Util.Next(101);
-                
+                // Debug.Log("prob " + prob);
+
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)
                 {

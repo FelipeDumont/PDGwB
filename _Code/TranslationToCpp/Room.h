@@ -1,7 +1,6 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-
 #include "Constants.h"
 #include <queue>
 #include <vector>

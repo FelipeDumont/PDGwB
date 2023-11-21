@@ -3,6 +3,7 @@
 
 #include <random>
 #include <algorithm>
+#include <vector>
 
 class Constants {
 public:
@@ -39,6 +40,7 @@ public:
 	static int nV, nK, nL; // Parameters related to fitness calculation nV(Rooms) nK(Keys) nL(Locks)
 	static float lCoef; // Parameter related to fitness calculation (linear Coeficient avgChildNodes)
 
+	// Seed use, and the FORCED mode to test the original Algorithm !
 	static int seed;
 	static std::mt19937 randGen;
 	static bool isForced;

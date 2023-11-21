@@ -50,19 +50,14 @@ public class TestingGenerator : MonoBehaviour
         Constants.nK = nKeys;
         Constants.nL = nLocks;
         Constants.lCoef = linearity;
-        Constants.modified = modifiedVersion;
 
         // Symmetry
         Constants.nSymmetry = symmetry;
         Constants.useSymmetry = useSymmetry;
         // Constant
-        if (modifiedVersion)
-        {
-            // MAX_DEPTH = nRooms - 1;
-            Constants.GENERATIONS = GENERATIONS;
-            Constants.POP_SIZE = POP_SIZE;
-            Constants.MAX_DEPTH = MAX_DEPTH;
-        }
+        Constants.GENERATIONS = GENERATIONS;
+        Constants.POP_SIZE = POP_SIZE;
+        Constants.MAX_DEPTH = MAX_DEPTH;
 
         // Create ... The ... Dungeon !!!
         generator.CreateDungeon();

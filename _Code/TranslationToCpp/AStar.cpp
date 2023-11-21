@@ -7,89 +7,114 @@
 int sizeX;
 int sizeY;
 
+Location::Location(){}
+
+Location::Location(int X, int Y)
+{
+    this->X = X;
+    this->Y = Y;
+}
+Location::Location(int X, int Y, Location* parent)
+{
+    this->X = X;
+    this->Y = Y;
+    this->Parent = parent;
+}
+
+Location::Location(int X,int Y, int F, int G, int H,Location* parent){
+    this->X = X;
+    this->Y = Y;
+    this->F = F;
+    this->G = G;
+    this->H = H;
+    this->Parent = parent;
+}
+
 int AStar::FindRoute(Dungeon dun, int matrixOffset) {
 
-        // The path through the dungeon
-        std::vector<Location> path;
+    // The path through the dungeon
+    std::vector<Location> path;
 
-        // Current, starting and target locations
-        Location current;
-        Location* start;
-        Location* target = nullptr;
+    // Current, starting and target locations
+    Location current;
+    Location* start;
+    Location* target = nullptr;
 
-        // List of locations of the locks that were still not opened
-        std::vector<Location> locksLocation;
+    // List of locations of the locks that were still not opened
+    std::vector<Location> locksLocation;
 
-        // List of locations of all the locks since the start of the algorithm
-        std::vector<Location> allLocksLocation;
+    // List of locations of all the locks since the start of the algorithm
+    std::vector<Location> allLocksLocation;
 
-        // Counter for all the locks that were opened during the A* execution
-        int neededLocks = 0;
+    // Counter for all the locks that were opened during the A* execution
+    int neededLocks = 0;
 
-        // The actual room being visited and its parent, to search for locks
-        Room* actualRoom;
-	    Room* parent;
+    // The actual room being visited and its parent, to search for locks
+    Room* actualRoom;
+    Room* parent;
 
-        // Type of the room
-        RoomType type;
+    // Type of the room
+    RoomType type;
 
-        // X and Y coordinates and their respective conversion to only-positive values
-        int x, y, iPositive, jPositive;
+    // X and Y coordinates and their respective conversion to only-positive values
+    int x, y, iPositive, jPositive;
 
-        // List of all the locked rooms
-        std::vector<int> lockedRooms;
+    // List of all the locked rooms
+    std::vector<int> lockedRooms;
 
-        // List of all the keys
-        std::vector<int> keys;
+    // List of all the keys
+    std::vector<int> keys;
 
-        // Min and max boundaries of the grid based on the original grid
-        int minX, minY, maxX, maxY;
-        minX = matrixOffset;
-        minY = matrixOffset;
-        maxX = -matrixOffset;
-        maxY = -matrixOffset;
+    // Min and max boundaries of the grid based on the original grid
+    int minX, minY, maxX, maxY;
+    minX = matrixOffset;
+    minY = matrixOffset;
+    maxX = -matrixOffset;
+    maxY = -matrixOffset;
 
-        // Check all the rooms and add them to the keys and locks lists if they are one of them
-        for (Room* room : dun.roomList) {
-            if (room->type == RoomType::key) {
-                keys.push_back(room->keyToOpen);
-                // std::cout << "adding Key [ " << room.keyToOpen << "]" <<std::endl;
-            }
-            if (room->type == RoomType::locked) {
-                lockedRooms.push_back(room->keyToOpen);
-                // std::cout << "adding lock [" << room.keyToOpen << "]"<< std::endl;
-            }
+    
 
-            // Check the boundaries of the farthest rooms in the grid
-            if (room->X < minX)
-                minX = room->X;
-            if (room->Y < minY)
-                minY = room->Y;
-            if (room->X > maxX)
-                maxX = room->X;
-            if (room->Y > maxY)
-                maxY = room->Y;
+     // Check all the rooms and add them to the keys and locks lists if they are one of them
+    for (Room* room : dun.roomList) {
+        if (room->type == RoomType::key) {
+            keys.push_back(room->keyToOpen);
+            // std::cout << "["<< room->X << ", " << room->Y << "] " << "adding Key [ " << room->keyToOpen << "]" <<std::endl;
+        }
+        if (room->type == RoomType::locked) {
+            lockedRooms.push_back(room->keyToOpen);
+            // std::cout << "["<< room->X << ", " << room->Y << "] " << "adding Lock [ " << room->keyToOpen << "]" <<std::endl;
         }
 
-        // The starting location is room (0,0)
-        start = new Location{ -2 * minX, -2 * minY };
-        
-        // std::cout << "Mins:" << minX  << ","<< minY << std::endl;
-        // std::cout << "Maxs:" << maxX  << ","<< maxY << std::endl;
-        // std::cout << "Start: " << start->X << " " << start->Y << std::endl;
+        // Check the boundaries of the farthest rooms in the grid
+        if (room->X < minX)
+            minX = room->X;
+        if (room->Y < minY)
+            minY = room->Y;
+        if (room->X > maxX)
+            maxX = room->X;
+        if (room->Y > maxY)
+            maxY = room->Y;
+    }
 
-        // List of visited rooms that are not closed yet
-        std::vector<Location> openList;
+    // The starting location is room (0,0)
+    start = new Location{ -2 * minX, -2 * minY };
+    
+    // std::cout << "Mins:" << minX  << ","<< minY << std::endl;
+    // std::cout << "Maxs:" << maxX  << ","<< maxY << std::endl;
+    // std::cout << "Start: " << start->X << " " << start->Y << std::endl;
 
-        // List of closed rooms. They were visited and all neighbors explored.
-        std::vector<Location> closedList;
+    // List of visited rooms that are not closed yet
+    std::vector<Location> openList;
 
-        // g score
-        int g = 0;
+    // List of closed rooms. They were visited and all neighbors explored.
+    std::vector<Location> closedList;
 
-        // Size of the new grid
-        sizeX = maxX - minX + 1;
-        sizeY = maxY - minY + 1;
+    // g score
+    int g = 0;
+
+    // Size of the new grid
+    sizeX = maxX - minX + 1;
+    sizeY = maxY - minY + 1;
 	// std::cout << sizeX << " " << sizeY << std::endl;
 
     // Instantiate the grid, check 101 ...
@@ -290,25 +315,19 @@ std::vector<Location> GetWalkableAdjacentSquares(int x, int y, std::vector<std::
     std::vector<Location> proposedLocations;
 
     if (y > 0)
-        proposedLocations.push_back({x, y - 1});
+        if(map[x][y-1] >= 0 && map[x][y-1] != 101)
+            proposedLocations.push_back({x, y - 1});
     if (y < (2 * sizeY) - 1)
-        proposedLocations.push_back({x, y + 1});
+        if(map[x][y+1] >= 0 && map[x][y+1] != 101)
+            proposedLocations.push_back({x, y + 1});
     if (x > 0)
-        proposedLocations.push_back({x - 1, y});
+        if(map[x-1][y] >= 0 && map[x-1][y] != 101)
+            proposedLocations.push_back({x - 1, y});
     if (x < (2 * sizeX) - 1)
-        proposedLocations.push_back({x + 1, y});
+        if(map[x+1][y] >= 0 && map[x+1][y] != 101)
+            proposedLocations.push_back({x + 1, y});
 
-    // std::cout<< "walkeable of" << x << "," << y << std::endl;
-    std::vector<Location> walkableLocations;
-
-    for (const Location &loc : proposedLocations) {
-        if (map[loc.X][loc.Y] >= 0 && map[loc.X][loc.Y] != 101) {
-            walkableLocations.push_back(loc);
-            // std::cout<< loc.X << "," << loc.Y << std::endl;
-        }
-    }
-
-    return walkableLocations;
+    return proposedLocations;
 }
 
 // Compute the heuristic score, in this case, a Manhattan Distance

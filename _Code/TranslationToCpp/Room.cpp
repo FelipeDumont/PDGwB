@@ -1,32 +1,23 @@
 #include "Room.h"
 #include <iostream>
 
-Room::Room(){
-	X = 0;
-	Y = 0;
-}
+Room::Room() : X(0), Y(0) {}
 
-Room::Room(int nX, int nY, int keyToOpen, int id, RoomType nT, Room* nParent){
+Room::Room(int nX, int nY, int keyToOpen, int id, RoomType nT, Room* nParent) :
+    X(nX), Y(nY), keyToOpen(keyToOpen), type(nT), Parent(nParent){
     
     if (id == -1)
 		roomId = Constants::getNextId();
 	else
 		roomId = id;
-	X = nX;
-	Y = nY;
-	keyToOpen = keyToOpen;
-	type = nT;
-	Parent = nParent;
 }
 
-Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1) {
-	X = 0;
-	Y = 0;
+Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1) :
+    X(0), Y(0), type(roomType) {
 	if (id == -1)
 		roomId = Constants::getNextId();
 	else
 		roomId = id;
-	type = roomType;
 	if (type == RoomType::key)
 		this->keyToOpen = roomId;
 	else if (type == RoomType::locked)
@@ -92,27 +83,29 @@ void Room::FixBranch(std::vector<int> specialRooms) {
     // Enqueue all the rooms
     while (!toVisit.empty()) {
         actualRoom = toVisit.front();
-        toVisit.pop();
         visited.push(actualRoom);
+        toVisit.pop();
         child = actualRoom->leftChild;
-        // std::cout << "Enqueue rooms " << actualRoom->roomId << std::endl;
-        if (child != nullptr)
+
+        if (child != nullptr){
             if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
+        }
         child = actualRoom->bottomChild;
-        if (child != nullptr)
+        if (child != nullptr){
             if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
+        }
         child = actualRoom->rightChild;
-        if (child != nullptr)
+        if (child != nullptr){
             if (actualRoom->Equal(child->Parent)) {
                 toVisit.push(child);
             }
+        }
     }
 
-    // std::cout << "To place randomly " << visited.size() << " " << newSpecialRooms.size() << std::endl;
     // Try to place all the special rooms in the branch randomly. If the number of remaining rooms is the same as the number of special rooms, every room must be a special one, so we finish this while loop.
     while (visited.size() > newSpecialRooms.size()) {
         actualRoom = visited.front();
@@ -128,7 +121,6 @@ void Room::FixBranch(std::vector<int> specialRooms) {
             } else {
                 
                 // If the room has a key, then the key must have an id and this id is added to the list of available keys
-                 
                 specialId = newSpecialRooms.front();
                 newSpecialRooms.pop();
                 if (specialId > 0) {
@@ -162,17 +154,14 @@ void Room::FixBranch(std::vector<int> specialRooms) {
             actualRoom->keyToOpen = -specialId;
         }
     }
-    //if (!newSpecialRooms.empty())
-    //    std::cout << "STOOOOOP" << std::endl;
 }
 
 bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
     int X, Y;
     Room* roomInGrid = nullptr;
-    // std::cout << "dir ???" << dir << std::endl;
+    // Calculate X and Y based on the parent's rotation
     switch (dir) {
         case Constants::Direction::right:
-            // Calculate X and Y based on the parent's rotation
             if (((this->rotation / 90) % 2) != 0) {
                 X = this->X;
                 if (this->rotation == 90)
@@ -186,7 +175,6 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     X = this->X - 1;
                 Y = this->Y;
             }
-            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
             roomInGrid = roomGrid.GetRoom(X,Y); // Assuming GetRoom method is available in RoomGrid class
             if (roomInGrid == nullptr) {
@@ -196,7 +184,6 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
             }
 
         case Constants::Direction::down:
-            // Calculate X and Y based on the parent's rotation
             if (((this->rotation / 90) % 2) != 0) {
                 Y = this->Y;
                 if (this->rotation == 90)
@@ -210,7 +197,6 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     Y = this->Y + 1;
                 X = this->X;
             }
-            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
             roomInGrid = roomGrid.GetRoom(X,Y);
             if (roomInGrid == nullptr) {
@@ -220,7 +206,6 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
             }
 
         case Constants::Direction::left:
-            // Calculate X and Y based on the parent's rotation
             if (((this->rotation / 90) % 2) != 0) {
                 X = this->X;
                 if (this->rotation == 90)
@@ -234,7 +219,6 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                     X = this->X + 1;
                 Y = this->Y;
             }
-            // std::cout <<  X << ", " << Y << "\n";
             // Check if the room is in the grid. If not, return true; otherwise, return false
             roomInGrid = roomGrid.GetRoom(X,Y); // Assuming GetRoom method is available in RoomGrid class
             if (roomInGrid == nullptr) {

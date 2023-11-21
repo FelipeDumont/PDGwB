@@ -66,15 +66,29 @@ namespace LevelGenerator
         {
             var proposedLocations = new List<Location>();
             if (y > 0)
+            {
                 proposedLocations.Add(new Location { X = x, Y = y - 1 });
+            }
             if (y < (2 * sizeY) - 1)
+            { 
                 proposedLocations.Add(new Location { X = x, Y = y + 1 });
+            }
             if (x > 0)
+            { 
                 proposedLocations.Add(new Location { X = x - 1, Y = y });
+            }
             if (x < (2 * sizeX) - 1)
+            { 
                 proposedLocations.Add(new Location { X = x + 1, Y = y });
+            }
 
-            return proposedLocations.Where(l => (map[l.X, l.Y] >= 0 && map[l.X, l.Y] != 101)).ToList();
+            proposedLocations = proposedLocations.Where(l => (map[l.X, l.Y] >= 0 && map[l.X, l.Y] != 101)).ToList();
+            foreach(var ploc in proposedLocations)
+            {
+                Debug.Log(ploc.X + " " + ploc.Y + " NEW");
+            }
+
+            return proposedLocations;
         }
 
         // Check if current location is a key room and...
@@ -96,6 +110,7 @@ namespace LevelGenerator
                             //Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
                             foreach (var closedRoom in ClosedList)
                             {
+
                                 //If it was already closed, reopen it. Remove from the closed list and add to the open list
                                 if (closedRoom.X == room.Parent.X && closedRoom.Y == room.Parent.Y)
                                 {
@@ -104,6 +119,7 @@ namespace LevelGenerator
                                     //Console.SetCursorPosition(0, 15 + auxoffset);
                                     //auxoffset += 1;
                                     //Console.WriteLine("Removed!");
+
                                     openList.Add(closedRoom);
                                     //If the closed room was a locked one, also remove one of the needed locks, as it is now reopen and will be revisited
                                     foreach (var locked in allLocksLocation)

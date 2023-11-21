@@ -46,6 +46,7 @@ namespace LevelGenerator
 
         public static int getNextId()
         {
+            // UnityEngine.Debug.Log("Set Next ID: " + (ID +1));
             return ID++;
         }
         public static bool IsValidUri(string uri)

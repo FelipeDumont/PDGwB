@@ -64,19 +64,20 @@ namespace LevelGenerator
 
 
                 //Get every dungeon's fitness
-                // Debug.Log("Generation " + gen + " fitnesses: ");
+                Debug.Log("Generation " + gen + " fitnesses: ");
                 foreach (Dungeon dun in dungeons)
                 {
                     dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                    /*
                     Debug.Log(dun.fitness);
+                    
+                    
                     string data = "";
                     foreach(Room r in dun.RoomList)
                     {
                         data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                     }
                     Debug.Log(data);
-                    */
+                    
                 }
 
                 //Elitism = save the best solution?
@@ -110,15 +111,17 @@ namespace LevelGenerator
                     
                     try
                     {
-                        // Debug.Log("Pre Evolution seedID? " + Util.randomSequence.Count);
+                        Debug.Log("Cross: " + Util.randomSequence.Count);
                         GA.Crossover(ref parent1, ref parent2);
                         // Debug.Log("Post Cross seedID?" + Util.randomSequence.Count);
 
-                        
+                        // Debug.Log("MUTATION: " + Util.randomSequence.Count);
                         GA.Mutation(ref parent1);
+                        // Debug.Log("END Mutation 1: " + Util.randomSequence.Count);
                         GA.Mutation(ref parent2);
-                        
-                        
+                        // Debug.Log("END Mutation 2 " + Util.randomSequence.Count);
+
+
 
                         //We need to fix the room list anytime a room is altered in the tree.
                         parent1.FixRoomList();
@@ -142,15 +145,16 @@ namespace LevelGenerator
                     
                 }
 
-
+                // Debug.Log("Add Again AUX " + aux.fitness );
                 childPop[0] = aux;
                 dungeons = childPop;
+                Debug.Log("Next Generation: " + (gen + 1));
             }
             //Find the best individual in the final population and print it as the answer
             min = Double.MaxValue;
             aux = dungeons[0];
 
-            // Debug.Log("Final Results: ");
+            
             foreach (Dungeon dun in dungeons)
             {
                 dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);

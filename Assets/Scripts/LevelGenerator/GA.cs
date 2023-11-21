@@ -134,7 +134,7 @@ namespace LevelGenerator
                         {
                             int randomID = Util.Next(1, ind2.RoomList.Count);
                             roomCut2 = ind2.RoomList[randomID];
-                            // Debug.Log("3+ " + roomCut2.RoomId + " | " + failedRooms.Contains(roomCut2));
+                            // Debug.Log("3+ " + roomCut2.RoomId + " | " + failedRooms.Contains(roomCut2) + "    "+ Util.randomSequence.Count);
                         } while (failedRooms.Contains(roomCut2));
                         failedRooms.Add(roomCut2);
                         if (failedRooms.Count == ind2.RoomList.Count - 1)
@@ -202,7 +202,7 @@ namespace LevelGenerator
                 //If the crossover can be done, do it. If not, don't.
                 if (!isImpossible)
                 {
-                    
+
                     /*
                     Debug.Log("FIX: ");
                     foreach (Room r in ind1.RoomList)
@@ -216,16 +216,19 @@ namespace LevelGenerator
                         Debug.Log(r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen);
                     }
                     */
-                    
+
+                    //Debug.Log("Fix branches 1: " + Util.randomSequence.Count);
                     roomCut2.FixBranch(specialRooms1);
                     // Debug.Log("Current in sequence " + Util.randomSequence.Count);
+                    // Debug.Log("Fix branches 2: " + Util.randomSequence.Count);
                     roomCut1.FixBranch(specialRooms2);
+                    // Debug.Log("Fixed " + Util.randomSequence.Count);
                     // Debug.Log("Current in sequence " + Util.randomSequence.Count);
                     //Fix the list of rooms
 
                     ind1.FixRoomList();
                     ind2.FixRoomList();
-
+                    // Debug.Log("Roomlist ?? " + Util.randomSequence.Count);
                     /*
                     Debug.Log("FIXed: ");
                     foreach (Room r in ind1.RoomList)
@@ -245,6 +248,7 @@ namespace LevelGenerator
                 indOriginal1 = ind1.Copy();
                 indOriginal2 = ind2.Copy();
             }
+            
         }
         /*
          * Mutates the individual by adding or removing a key pair
@@ -307,9 +311,8 @@ namespace LevelGenerator
         {
             
             float avgUsedRoom = 0.0f;
-            DFS[] dfs = new DFS[3];
+            DFS dfs;
             AStar astar = new AStar();
-            float indSym = 0;
             //Only use the A* and DFS if there is a lock in the dungeon
             if (ind.nLocks > 0)
             {
@@ -319,7 +322,22 @@ namespace LevelGenerator
                 //Execute 3 times the DFS to minimize the randomness
                 //Execute them in parallel to make things faster
                 //The DFS finds the number of rooms needed to finish the dungeon be exploring blindly.
-
+                /*
+                Debug.Log("DFS ... "+ Util.randomSequence.Count);
+                dfs = new DFS(ind);
+                dfs.FindRoute();
+                avgUsedRoom += dfs.NVisitedRooms;
+                Debug.Log("DFS1 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                dfs = new DFS(ind);
+                dfs.FindRoute();
+                avgUsedRoom += dfs.NVisitedRooms;
+                Debug.Log("DFS2 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                dfs = new DFS(ind);
+                dfs.FindRoute();
+                avgUsedRoom += dfs.NVisitedRooms;
+                Debug.Log("DFS3 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                */
+                // Main Change, the Algorithm will do it one at a time !
                 /*
                 if (Constants.modified == false)
                 {
@@ -337,46 +355,8 @@ namespace LevelGenerator
                         }
                     });
                 }
-                if (Constants.useSymmetry)
-                {
-                    int sRooms = 0;
-                    int symmetricRooms = 0;
-                    List<Room> ids = new List<Room>();
-                    // Just center L and R
-                    foreach (Room room in ind.RoomList)
-                    {
-                        if(room.X != 0)
-                        {
-                            ids.Add(room);
-                            sRooms += 1;
-                        }
-                    }
-                    while ( ids.Count > 0)
-                    {
-                        Room r = ids[0];
-                        ids.RemoveAt(0);
-                        int foundSymID = -1;
-                        for (int i = 0; i < ids.Count; i++)
-                        {
-                            // Center in 0 symmetry in X
-                            if(ids[i].X == -r.X && ids[i].Y == r.Y)
-                            {
-                                // Found equivalent
-                                symmetricRooms += 1;
-                                foundSymID = i;
-                                break;
-                            }
-                        }
-                        if (foundSymID != -1)
-                        {
-                            ids.RemoveAt(foundSymID);
-                        }
-                    }
-                    // Onc all passes the symmetry is calculated based on the total rooms in existance
-                    indSym = (symmetricRooms * 1.0f) / sRooms;
-                }
                 */
-                
+
                 // Normal For ???
                 ind.neededRooms = avgUsedRoom / 3.0f;
 
@@ -389,46 +369,19 @@ namespace LevelGenerator
                 //Also, if we find more locks that really exist
                 if (ind.neededLocks > ind.nLocks)
                     Debug.Log("SOMETHING IS REALLY WRONG!");
-                //If everything is ok, return the fitness. We are currently giving 5 times more emphasis to the linearity as a small difference results in very different dungeons
-                //We also are trying to make 80% of the rooms needed to finish, the rest are optional.
-                if (Constants.modified == false)
-                {
-                    
-                    return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+
+                /*
+                Debug.Log("PArts of fitness " + (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+                        + System.Math.Abs(lCoef - ind.AvgChildren) * 5))
+                     + " O " + ((ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count * 0.8f - ind.neededRooms)));
+                */
+                return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
                         + System.Math.Abs(lCoef - ind.AvgChildren) * 5) + (ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count * 0.8f - ind.neededRooms));
-                }
-                else
-                {
-                    if (Constants.useSymmetry)
-                    {
-                        
-                        return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
-                            + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks)) + System.Math.Abs(Constants.nSymmetry - indSym);
-                    }
-                    else
-                    {
-                        // Debug.Log(ind.neededLocks);
-                        return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
-                            + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks - ind.neededLocks));
-                    }
-                }
             }
+
             //If there are no locks, the fitness is based only in the map layout
             else
                 return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
         }
-
-        public void SetDFSSeed()
-        {
-            // Reset every Generation
-            if (Constants.modified == false)
-            {
-                seedDFS.Clear();
-                seedDFS.Add(Util.Next(100));
-                seedDFS.Add(Util.Next(100));
-                seedDFS.Add(Util.Next(100));
-            }
-        }
-
     }
 }

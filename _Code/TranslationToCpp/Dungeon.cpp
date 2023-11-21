@@ -2,7 +2,7 @@
 #include "RoomFactory.h"
 #include "Constants.h"
 #include "Dungeon.h"
-
+#include <unordered_map>
 
 Dungeon::Dungeon() {
 	roomList.clear();
@@ -27,6 +27,7 @@ Dungeon::~Dungeon(){
 Dungeon* Dungeon::Copy() {
     Dungeon* copyDungeon = new Dungeon();
     copyDungeon->roomList.clear();
+    // Removed the First root room in the copy, since it will allways be removed ...
     copyDungeon->nKeys = nKeys;
     copyDungeon->nLocks = nLocks;
     copyDungeon->desiredKeys = desiredKeys;
@@ -265,6 +266,7 @@ void Dungeon::AddLockAndKey() {
     }
 }
 
+/*
 void Dungeon::RemoveLockAndKey() {
     int removeKey = Constants::Next(nKeys);
     int removeLock = removeKey;
@@ -346,29 +348,112 @@ void Dungeon::RemoveLockAndKey() {
     nKeys -= hasKey ? 1 : 0;
     nLocks -= hasLock ? 1 : 0;
 }
+*/
 
-void Dungeon::FixRoomList() {
-        std::queue<Room*> toVisit;
-        toVisit.push( roomList[0]);
-        nKeys = 0;
-        nLocks = 0;
-        roomList.clear();
-        while (!toVisit.empty()) {
-            Room* actualRoom = toVisit.front();
+void Dungeon::RemoveLockAndKey() {
+    //std::cout << "Select between " << nKeys << std::endl;
+    int removeKey = Constants::Next(nKeys);
+    //std::cout << "Select between " << nKeys << std::endl;
+    Room* actualRoom = roomList[0];
+    std::queue<Room*> toVisit;
+    toVisit.push(actualRoom);
+
+    // Allways just the pair !
+    bool hasKey = true;
+    bool hasLock = true;
+    int keyCount = 0;
+    int lockId = -1;
+    
+
+    // Find the key to remove and get its corresponding lockId
+    for (Room* r : roomList) {
+        if (r->type == RoomType::key) {
+            //std::cout << "KEYS "<< r->keyToOpen << std::endl;
+            if (removeKey == keyCount) {
+                lockId = r->keyToOpen;
+                break;
+            }
+            keyCount++;
+        }
+    }
+
+    //std::cout << "selected key ??? " << removeKey  << " | " << lockId << "/" << nKeys << std::endl;
+    if (lockId != -1) {
+        // Remove the key and its corresponding lock
+        while (!toVisit.empty() && (hasLock || hasKey)) {
+            actualRoom = toVisit.front();
             toVisit.pop();
-            roomList.push_back(actualRoom);
-            if (actualRoom->type == RoomType::key)
-                nKeys++;
-            else if (actualRoom->type == RoomType::locked)
-                nLocks++;
-            if (actualRoom->leftChild != nullptr)
+
+            if ((actualRoom->type == RoomType::key && actualRoom->roomId == lockId) && hasKey) {
+                //std::cout << " Removed key " << nKeys << std::endl;
+                (*actualRoom).type = RoomType::normal;
+                hasKey = false;
+                (*actualRoom).keyToOpen = -1;
+                // Update the grid
+                roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                nKeys--;
+            }
+
+            if ((actualRoom->type == RoomType::locked && actualRoom->keyToOpen == lockId) && hasLock) {
+                //std::cout << " Removed lock " << nLocks << std::endl;
+                (*actualRoom).type = RoomType::normal;
+                (*actualRoom).keyToOpen = -1;
+                // Update the grid
+                roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                nLocks--;
+                hasLock = false;
+                
+            }
+
+
+            // Add child rooms to the visit queue
+            if (actualRoom->leftChild != nullptr && actualRoom->Equal(actualRoom->leftChild->Parent))
                 toVisit.push(actualRoom->leftChild);
-            if (actualRoom->bottomChild != nullptr)
+
+            if (actualRoom->bottomChild != nullptr && actualRoom->Equal(actualRoom->bottomChild->Parent))
                 toVisit.push(actualRoom->bottomChild);
-            if (actualRoom->rightChild != nullptr)
+
+            if (actualRoom->rightChild != nullptr && actualRoom->Equal(actualRoom->rightChild->Parent))
                 toVisit.push(actualRoom->rightChild);
         }
     }
+    // std::cout << "Locks and keys removed ! " << nLocks  << " / " << nKeys  << std::endl;
+}
+
+void Dungeon::FixRoomList() {
+    std::queue<Room*> toVisit;
+    toVisit.push(roomList[0]);
+
+    // Reset counts to 0
+    nKeys = 0;
+    nLocks = 0;
+    roomList.clear();
+
+    // Perform BFS to reconstruct roomList
+    while (!toVisit.empty()) {
+        Room* actualRoom = toVisit.front();
+        toVisit.pop();
+
+        // Push the current room into the vector
+        roomList.push_back(actualRoom);
+        roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+
+        // Increment counts based on room type
+        if (actualRoom->type == RoomType::key)
+            nKeys++;
+        else if (actualRoom->type == RoomType::locked)
+            nLocks++;
+
+        // Add child rooms to the visit queue
+        if (actualRoom->leftChild != nullptr)
+            toVisit.push(actualRoom->leftChild);
+        if (actualRoom->bottomChild != nullptr)
+            toVisit.push(actualRoom->bottomChild);
+        if (actualRoom->rightChild != nullptr)
+            toVisit.push(actualRoom->rightChild);
+    }
+}
+
 
 
 

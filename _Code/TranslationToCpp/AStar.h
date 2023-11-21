@@ -1,10 +1,10 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#include "iostream"
-#include "vector"
-#include "algorithm"
-#include "Dungeon.h" // Includes Dungeon.h to use Room, RoomGrid, Type, and Dungeon
+#include "Dungeon.h"
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
 class Location;
 class AStar;
@@ -20,9 +20,15 @@ public:
 	Location* Parent; // Pointer to the parent location
 
 	// Define the equality operator for Location objects
-	bool operator==(const Location& other) const {
+	bool operator==(Location other) const {
 		return (X == other.X) && (Y == other.Y);
 	}
+
+	Location();
+	Location(int X, int Y);
+	Location(int X,int Y,Location* parent);
+	Location(int X,int Y, int F, int G, int H,Location* parent);
+
 
 };
 
