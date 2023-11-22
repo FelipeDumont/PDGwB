@@ -32,6 +32,7 @@ int main(int argc, char* argv[]){
         // Assign internally
         ga.testingMode = testingMode;
 
+        std::cout << Constants::POP_SIZE << std::endl;
         // Finally we check the random sequence
         if(argc == 13 && useForceRandomSequence){
             std::string fileName = argv[12];// "RandomSequence.txt";
@@ -41,15 +42,7 @@ int main(int argc, char* argv[]){
             }
         }
 
-        // Start For real !
-        if(testingBasics){
-
-            ga.FirstTest();
-        }
-        else{
-            std::vector<Dungeon*> results = ga.CreateDungeon();
-        }
-        
+        std::vector<Dungeon*> results = ga.CreateDungeon();
     }
     else{
         std::cout << "Wrong quantity of Arguments !";

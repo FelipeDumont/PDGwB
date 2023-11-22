@@ -114,10 +114,11 @@ public class TestingGenerator : MonoBehaviour
         return generator.GetDungeon(id);
     }
 
-    private string filePath = "Assets/RandomSequence.txt";
+    
 
     public void CreateRandomSequenceFile()
     {
+        string filePath = "Assets/RandomSequence_"+ GENERATIONS + "_" + MAX_DEPTH + "_"+ POP_SIZE + "_" + nRooms + "_" + nKeys + "_" + nLocks + "_" + linearity + ".txt";
         // Check if the file already exists, and if it does, delete it
         if (File.Exists(filePath))
         {

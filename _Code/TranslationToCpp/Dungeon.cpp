@@ -49,19 +49,17 @@ void Dungeon::CleanDungeon(){
 Dungeon* Dungeon::Copy() {
     Dungeon* copyDungeon = new Dungeon();
     
-    copyDungeon->CleanDungeon();
-    
-    copyDungeon->roomList.clear();
-    // Removed the First root room in the copy, since it will allways be removed ...
-    
+    copyDungeon->CleanDungeon();  // Make sure this effectively removes any existing data
+
     copyDungeon->nKeys = nKeys;
     copyDungeon->nLocks = nLocks;
     copyDungeon->desiredKeys = desiredKeys;
     copyDungeon->avgChildren = avgChildren;
     copyDungeon->fitness = fitness;
-    
+
     std::unordered_map<Room*, Room*> roomMap;  // Map to store old Room pointers to corresponding new Room pointers
     roomMap[nullptr] = nullptr;
+
     // First create all the rooms
     for (Room* oldRoom : roomList) {
         Room* newRoom = oldRoom->Copy();
@@ -74,17 +72,22 @@ Dungeon* Dungeon::Copy() {
         Room* oldRoom = newRoom;  // Reuse the variable for readability
 
         // Update links (Parent, leftChild, rightChild, bottomChild) using the mapping...
-        (*newRoom).Parent = roomMap[oldRoom->Parent];
-        (*newRoom).leftChild = roomMap[oldRoom->leftChild];
-        (*newRoom).rightChild = roomMap[oldRoom->rightChild];
-        (*newRoom).bottomChild = roomMap[oldRoom->bottomChild];
+        if (oldRoom->Parent)
+            newRoom->Parent = roomMap[oldRoom->Parent];
+        if (oldRoom->leftChild)
+            newRoom->leftChild = roomMap[oldRoom->leftChild];
+        if (oldRoom->rightChild)
+            newRoom->rightChild = roomMap[oldRoom->rightChild];
+        if (oldRoom->bottomChild)
+            newRoom->bottomChild = roomMap[oldRoom->bottomChild];
 
         // Once they are cleaned of the old room data
         copyDungeon->roomGrid.SetRoom(newRoom->X, newRoom->Y, newRoom);
     }
-    
+
     return copyDungeon;
 }
+
 
 
 void Dungeon::CalcAvgChildren() {
@@ -198,11 +201,11 @@ void Dungeon::RemoveFromGrid(Room* cut) {
         
         // Clean them then ...
         roomGrid.SetRoom(cut->X, cut->Y, nullptr);
-        // Finding the room with a specific roomID and erasing it from roomList
-        auto it = std::find_if(roomList.begin(), roomList.end(),
-                               [cut](Room* room) { return room->Equal(cut); });
-        if (it != roomList.end()) {
-            roomList.erase(it);
+        for (auto it = roomList.begin(); it != roomList.end(); ++it) {
+            if ((*it)->Equal(cut)) {
+                roomList.erase(it);
+                break;  // break out of the loop once the element is erased
+            }
         }
     }
 }

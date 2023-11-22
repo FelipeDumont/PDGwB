@@ -24,13 +24,12 @@ public:
 
     void Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2);
     void ChangeChildren(Room* cut1, Room* cut2);
-    void Crossover(Dungeon* indOriginal1, Dungeon* indOriginal2);
+    void Crossover(Dungeon*& indOriginal1, Dungeon*& indOriginal2);
     void Mutation(Dungeon* dun);
 
     // Testing
     void ReadSequence(std::string fileName);
-    int Testing(); // OLD int main()
-    void FirstTest();
+
 };
 
 #endif

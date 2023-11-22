@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
+/*
 int DFS::FindRoute(Dungeon* dun) {
     neededLocks = 0;
     nVisitedRooms = 0;
@@ -21,11 +22,11 @@ int DFS::FindRoute(Dungeon* dun) {
     path.push_back(new Location(start->X, start->Y));
 
     while (!openList.empty()) {
-        /*
+        
         for(Location* loc :openList){
             std::cout << "open [" << loc->X << ", " << loc->Y << "] " << std::endl;
         }
-        */
+        
         Location* current = openList.front();
         ValidateKeyRoom(current);
         std::cout << "DFS current [" << current->X << ", " << current->Y << "] [" << target->X << ", " << target->Y << "]" << std::endl;
@@ -77,7 +78,7 @@ int DFS::FindRoute(Dungeon* dun) {
 
         std::cout << "Finished Randoms, now clean" << std::endl;
         for (auto it = adjacentSquares.begin(); it != adjacentSquares.end(); ) {
-            if (current->Parent == *it) {
+            if (current->ParentX == (*it)->X && current->ParentY == (*it)->Y) {
                 it = adjacentSquares.erase(it);
             } else {
                 ++it;
@@ -107,11 +108,13 @@ int DFS::FindRoute(Dungeon* dun) {
 
             if (openListIt == openList.end()) {
                 std::cout << "adding " << adjacentSquare->X << ", " << adjacentSquare->Y << std::endl;
-                adjacentSquare->Parent = current;
+                adjacentSquare->ParentX = current->X;
+                adjacentSquare->ParentY = current->Y;
                 openList.insert(openList.begin(), new Location(*adjacentSquare));
                 path.push_back(new Location(*adjacentSquare));
             } else {
-                (*openListIt)->Parent = current;
+                (*openListIt)->ParentX = current->X;
+                (*openListIt)->ParentY = current->Y;
             }
         }
 
@@ -151,7 +154,7 @@ void DFS::ValidateKeyRoom(Location* current) {
 
                     for (auto closedRoomIt = ClosedList.begin(); closedRoomIt != ClosedList.end(); ) {
                         Location loc = **closedRoomIt;
-                        if ((*closedRoomIt)->X == locit.Parent->X && (*closedRoomIt)->Y == locit.Parent->Y) {
+                        if ((*closedRoomIt)->X == locit.ParentX && (*closedRoomIt)->Y == locit.ParentY) {
                             closedRoomIt = ClosedList.erase(closedRoomIt);
                             nVisitedRooms--;
 
@@ -315,3 +318,4 @@ int DFS::FindIndex(const std::vector<int> vec, int valueToFind) {
     }
 }
 
+*/

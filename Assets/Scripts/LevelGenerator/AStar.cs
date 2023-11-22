@@ -90,6 +90,7 @@ namespace LevelGenerator
                 // Debug.Log("[" + room.X + " " + room.Y + "]");
             }
 
+            // Debug.Log("X,Y : " + minX + ", " + maxX + " | " + minY + ", " + maxY);
             //The starting location is room (0,0)
             start = new Location { X = -2*minX, Y = -2*minY };
             // Debug.Log("[" + minX + " " + minY + "]");
@@ -204,7 +205,7 @@ namespace LevelGenerator
                 // get the square with the lowest F score
                 var lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
-                // Debug.Log(current.X + ", "+ current.Y);
+                // Debug.Log("Current Node : " + current.X + ", "+ current.Y);
                 //if the current is a key, change the locked door status in the map
                 if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < 100)
                 {
@@ -307,8 +308,8 @@ namespace LevelGenerator
                     }
                 }
             }
-            //Debug.Log(start.X + " " + start.Y );
-            //Debug.Log(target.X + " " + target.Y);
+            // Debug.Log(start.X + " " + start.Y );
+            // Debug.Log(target.X + " " + target.Y);
             //Debug.Log("Resulting needed locks : " + neededLocks);
             return neededLocks;
         }

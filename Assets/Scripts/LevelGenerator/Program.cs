@@ -41,6 +41,7 @@ namespace LevelGenerator
             // Generate the first population
             for (int i = 0; i < dungeons.Capacity; ++i)
             {
+                Debug.Log("Create Dungeon: " + Util.randomSequence.Count);
                 Dungeon individual = new Dungeon();
                 individual.GenerateRooms();
                 dungeons.Add(individual);
@@ -111,16 +112,18 @@ namespace LevelGenerator
                     
                     try
                     {
-                        Debug.Log("Cross: " + Util.randomSequence.Count);
+                        Debug.Log("Cross: " + parentIdx1 + " | " + parentIdx2 + "   " + Util.randomSequence.Count);
                         GA.Crossover(ref parent1, ref parent2);
                         // Debug.Log("Post Cross seedID?" + Util.randomSequence.Count);
 
-                        // Debug.Log("MUTATION: " + Util.randomSequence.Count);
-                        GA.Mutation(ref parent1);
-                        // Debug.Log("END Mutation 1: " + Util.randomSequence.Count);
-                        GA.Mutation(ref parent2);
-                        // Debug.Log("END Mutation 2 " + Util.randomSequence.Count);
+                        Debug.Log("End Cross: " + Util.randomSequence.Count);
 
+                        
+                        GA.Mutation(ref parent1);
+                        Debug.Log("END Mutation 1: " + Util.randomSequence.Count);
+                        GA.Mutation(ref parent2);
+                        Debug.Log("END Mutation 2 " + Util.randomSequence.Count);
+                        
 
 
                         //We need to fix the room list anytime a room is altered in the tree.
