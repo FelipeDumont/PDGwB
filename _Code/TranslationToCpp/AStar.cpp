@@ -1,5 +1,3 @@
-
-
 #include "AStar.h"
 
 
@@ -30,7 +28,7 @@ Location::Location(int X,int Y, int F, int G, int H,Location* parent){
     this->Parent = parent;
 }
 
-int AStar::FindRoute(Dungeon dun, int matrixOffset) {
+int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
 
     // The path through the dungeon
     std::vector<Location> path;
@@ -74,34 +72,22 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
 
     
 
-     // Check all the rooms and add them to the keys and locks lists if they are one of them
-    for (Room* room : dun.roomList) {
+    for (const Room* room : dun->roomList) {
         if (room->type == RoomType::key) {
             keys.push_back(room->keyToOpen);
-            // std::cout << "["<< room->X << ", " << room->Y << "] " << "adding Key [ " << room->keyToOpen << "]" <<std::endl;
-        }
-        if (room->type == RoomType::locked) {
+        } else if (room->type == RoomType::locked) {
             lockedRooms.push_back(room->keyToOpen);
-            // std::cout << "["<< room->X << ", " << room->Y << "] " << "adding Lock [ " << room->keyToOpen << "]" <<std::endl;
         }
-
-        // Check the boundaries of the farthest rooms in the grid
-        if (room->X < minX)
-            minX = room->X;
-        if (room->Y < minY)
-            minY = room->Y;
-        if (room->X > maxX)
-            maxX = room->X;
-        if (room->Y > maxY)
-            maxY = room->Y;
+        // Update min/max boundaries
+        minX = std::min(minX, room->X);
+        minY = std::min(minY, room->Y);
+        maxX = std::max(maxX, room->X);
+        maxY = std::max(maxY, room->Y);
     }
 
     // The starting location is room (0,0)
     start = new Location{ -2 * minX, -2 * minY };
     
-    // std::cout << "Mins:" << minX  << ","<< minY << std::endl;
-    // std::cout << "Maxs:" << maxX  << ","<< maxY << std::endl;
-    // std::cout << "Start: " << start->X << " " << start->Y << std::endl;
 
     // List of visited rooms that are not closed yet
     std::vector<Location> openList;
@@ -131,7 +117,7 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
             jPositive = j - minY;
             // std::cout<< "Check the room [" << i << " " << j << "] = "<< (dun.roomGrid.GetRoom(i,j) == nullptr) << std::endl;
             
-            actualRoom = dun.roomGrid.GetRoom(i,j);
+            actualRoom = dun->roomGrid.GetRoom(i,j);
 
             if(actualRoom != nullptr){
                 // If the position has a room, check its type and fill the grid accordingly
@@ -170,8 +156,8 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
                     y = parent->Y - actualRoom->Y + 2 * jPositive;
                     
                     if (type == RoomType::locked) {
-                        Location* loc = new Location{ x, y,0,0,0, new Location{ 2 * (parent->X - actualRoom->X) + 2 * iPositive, 2 * (parent->Y - actualRoom->Y) + 2 * jPositive } };
-                        locksLocation.push_back(*loc);
+                        Location loc( x, y,0,0,0, new Location{ 2 * (parent->X - actualRoom->X) + 2 * iPositive, 2 * (parent->Y - actualRoom->Y) + 2 * jPositive } );
+                        locksLocation.push_back(loc);
                         map[x][y] = -(findIndex(keys, actualRoom->keyToOpen) + 1);
                         // std::cout << "CR ["<<  x << ", " << y << "] = " << map[x][y] << "index of" << findIndex(keys, actualRoom->keyToOpen) << std::endl;
                     }
@@ -192,10 +178,9 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
 	// std::cout <<  "T" << target->X << " "  << target->Y << std::endl;
 
 	
-    // Add all the locks location to the list that will hold their values through the execution of the algorithm
-    for (Location locked : locksLocation) {
+    // Add locks locations to the list
+    for (const Location& locked : locksLocation) {
         allLocksLocation.push_back(locked);
-        // std::cout <<"Locked room "  <<  locked.X << " "  << locked.Y << std::endl;
     }
 
     // Start by adding the original position to the open list
@@ -305,30 +290,33 @@ int AStar::FindRoute(Dungeon dun, int matrixOffset) {
         }
     }
 
-	// std::cout << "Locks " << neededLocks << " :C :C :C \n\n";
+    // Delete dynamically allocated memory in locksLocation
+    for (Location& locked : locksLocation) {
+        delete locked.Parent;  // Delete the dynamically allocated parent
+    }
+	delete start;
+    delete target;
+
 
     return neededLocks;
 }
 
 // Check what adjacent rooms exist and can be visited and return the valid ones
-std::vector<Location> GetWalkableAdjacentSquares(int x, int y, std::vector<std::vector<int>> map) {
+std::vector<Location> GetWalkableAdjacentSquares(int x, int y, const std::vector<std::vector<int>>& map) {
     std::vector<Location> proposedLocations;
 
-    if (y > 0)
-        if(map[x][y-1] >= 0 && map[x][y-1] != 101)
-            proposedLocations.push_back({x, y - 1});
-    if (y < (2 * sizeY) - 1)
-        if(map[x][y+1] >= 0 && map[x][y+1] != 101)
-            proposedLocations.push_back({x, y + 1});
-    if (x > 0)
-        if(map[x-1][y] >= 0 && map[x-1][y] != 101)
-            proposedLocations.push_back({x - 1, y});
-    if (x < (2 * sizeX) - 1)
-        if(map[x+1][y] >= 0 && map[x+1][y] != 101)
-            proposedLocations.push_back({x + 1, y});
+    if (y > 0 && map[x][y - 1] >= 0 && map[x][y - 1] != 101)
+        proposedLocations.push_back({ x, y - 1 });
+    if (y < (2 * sizeY) - 1 && map[x][y + 1] >= 0 && map[x][y + 1] != 101)
+        proposedLocations.push_back({ x, y + 1 });
+    if (x > 0 && map[x - 1][y] >= 0 && map[x - 1][y] != 101)
+        proposedLocations.push_back({ x - 1, y });
+    if (x < (2 * sizeX) - 1 && map[x + 1][y] >= 0 && map[x + 1][y] != 101)
+        proposedLocations.push_back({ x + 1, y });
 
     return proposedLocations;
 }
+
 
 // Compute the heuristic score, in this case, a Manhattan Distance
 int ComputeHScore(int x, int y, int targetX, int targetY) {
@@ -360,5 +348,3 @@ int findLowestF(std::vector<Location> vec){
 bool compareLocationsF(Location a, Location b){
 	return a.F > b.F;
 }
-
-

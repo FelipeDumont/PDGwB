@@ -23,6 +23,8 @@ public:
 
     Dungeon* Copy();
 
+    void CleanDungeon();
+
     void CalcAvgChildren();
 
     void InstantiateRoom(Room* child, Room* actualRoom, Constants::Direction dir);
