@@ -25,11 +25,7 @@ Room::Room(RoomType roomType = RoomType::normal, int keyToOpen = -1, int id = -1
 }
 
 Room::~Room(){
-    // Clean the Room 
-    if (Parent != nullptr) delete Parent;
-    if (leftChild != nullptr) delete leftChild;
-    if (rightChild != nullptr) delete rightChild;
-    if (bottomChild != nullptr) delete bottomChild;
+    CleanRoom();
 }
 
 Room* Room::Copy() {
@@ -47,6 +43,13 @@ Room* Room::Copy() {
 	return newRoom;
 }
 
+void Room::CleanRoom(){
+    // Clean the Room 
+    Parent = nullptr;
+    leftChild = nullptr;
+    rightChild = nullptr;
+    bottomChild = nullptr;
+}
 
 void Room::FixBranch(std::vector<int> specialRooms) {
     std::queue<Room*> toVisit;
@@ -376,5 +379,17 @@ void RoomGrid::SetRoom(int x, int y, Room* value){
     
     grid[x+ Constants::MATRIXOFFSET][y+ Constants::MATRIXOFFSET] = value;
 
+}
+
+void RoomGrid::ClearGrid() {
+
+    while(!grid.empty()){
+        std::vector<Room*> row = grid.back();
+        while (!row.empty()) {
+            row.pop_back();
+        }
+        grid.pop_back();
+    }
+    grid.resize(Constants::MATRIXOFFSET*2, std::vector<Room*>(Constants::MATRIXOFFSET*2,nullptr));
 }
 

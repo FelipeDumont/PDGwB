@@ -771,14 +771,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3f3789f34523b48ae0b458db146e02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nRooms: 5
+  nRooms: 7
   nKeys: 1
   nLocks: 1
   linearity: 1.2
   currentSeed: 2
   modifiedVersion: 0
   GENERATIONS: 500
-  POP_SIZE: 4
+  POP_SIZE: 10
   MAX_DEPTH: 10
   useSymmetry: 0
   symmetry: 1
