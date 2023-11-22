@@ -16,56 +16,31 @@ Dungeon::Dungeon() {
 }
 
 Dungeon::~Dungeon(){
-    CleanDungeon();
-}
 
-void Dungeon::CleanDungeon(){
-    
-    // std::cout << "clean To visit" << std::endl;
-    while (!toVisit.empty()) {
-        Room* roomPtr = toVisit.front(); // or back() depending on your needs
+    while(!toVisit.empty()){
         toVisit.pop();
-        delete roomPtr; // Delete the object
     }
-
-    // std::cout << "clean roomlist " << roomList.size() << std::endl;
-    
-    for(Room* roomPtr : roomList){
-        roomPtr->CleanRoom();
-    }
-    
-    // Clean memory of roomList
-    while (!roomList.empty()) {
-        Room* roomPtr = roomList.back(); // or front() depending on your needs
-        delete roomPtr;
-        roomList.pop_back();
-    }
-
-    // std::cout << "Clean Grid "<< std::endl;
-    roomGrid.ClearGrid();
+    roomList.clear();
     
 }
 
 Dungeon* Dungeon::Copy() {
     Dungeon* copyDungeon = new Dungeon();
-    
-    copyDungeon->CleanDungeon();
-    
     copyDungeon->roomList.clear();
     // Removed the First root room in the copy, since it will allways be removed ...
-    
     copyDungeon->nKeys = nKeys;
     copyDungeon->nLocks = nLocks;
     copyDungeon->desiredKeys = desiredKeys;
     copyDungeon->avgChildren = avgChildren;
     copyDungeon->fitness = fitness;
-    
+
     std::unordered_map<Room*, Room*> roomMap;  // Map to store old Room pointers to corresponding new Room pointers
-    roomMap[nullptr] = nullptr;
+
     // First create all the rooms
     for (Room* oldRoom : roomList) {
         Room* newRoom = oldRoom->Copy();
         copyDungeon->roomList.push_back(newRoom);
+        copyDungeon->roomGrid.SetRoom(newRoom->X, newRoom->Y, newRoom);
         roomMap[oldRoom] = newRoom;  // Store the mapping
     }
 
@@ -74,15 +49,12 @@ Dungeon* Dungeon::Copy() {
         Room* oldRoom = newRoom;  // Reuse the variable for readability
 
         // Update links (Parent, leftChild, rightChild, bottomChild) using the mapping...
-        (*newRoom).Parent = roomMap[oldRoom->Parent];
-        (*newRoom).leftChild = roomMap[oldRoom->leftChild];
-        (*newRoom).rightChild = roomMap[oldRoom->rightChild];
-        (*newRoom).bottomChild = roomMap[oldRoom->bottomChild];
-
-        // Once they are cleaned of the old room data
-        copyDungeon->roomGrid.SetRoom(newRoom->X, newRoom->Y, newRoom);
+        newRoom->Parent = roomMap[oldRoom->Parent];
+        newRoom->leftChild = roomMap[oldRoom->leftChild];
+        newRoom->rightChild = roomMap[oldRoom->rightChild];
+        newRoom->bottomChild = roomMap[oldRoom->bottomChild];
     }
-    
+
     return copyDungeon;
 }
 
@@ -294,6 +266,90 @@ void Dungeon::AddLockAndKey() {
     }
 }
 
+/*
+void Dungeon::RemoveLockAndKey() {
+    int removeKey = Constants::Next(nKeys);
+    int removeLock = removeKey;
+    Room* actualRoom;
+    Room* child;
+    actualRoom = roomList[0];
+    std::queue<Room*>toVisit;
+    toVisit.push(actualRoom);
+    bool hasKey = false;
+    bool hasLock = false;
+    int lockId = -1;
+    int keyCount = 0;
+
+
+    // std::cout << "Obtain the room list key (ID)" << std::endl;
+    for (Room* r : roomList) {
+        if (r->type == RoomType::key) {
+            if (removeKey == keyCount)
+                lockId = r->roomId;
+            keyCount++;
+        }
+    }
+
+    // std::cout << "Check all the nodes that relate to said key (until the key is found and remove !)" << std::endl;
+    while (!toVisit.empty() && (!hasKey)) {
+        actualRoom = toVisit.front();
+        toVisit.pop();
+        if (actualRoom->type == RoomType::key) {
+            if (actualRoom->roomId == lockId) {
+                (*actualRoom).type = RoomType::normal;
+                (*actualRoom).keyToOpen = -1;
+                lockId = actualRoom->roomId;
+                roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                hasKey = true;
+            }
+        }
+        child = actualRoom->leftChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->bottomChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->rightChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+    }
+    // std::cout << "C" << std::endl;
+    actualRoom = roomList[0];
+    toVisit = std::queue<Room*>();
+    toVisit.push(actualRoom);
+
+    while (!toVisit.empty() && !hasLock) {
+        actualRoom = toVisit.front();
+        toVisit.pop();
+        if (actualRoom->type == RoomType::locked) {
+            if (actualRoom->keyToOpen == lockId) {
+                (*actualRoom).type = RoomType::normal;
+                (*actualRoom).keyToOpen = -1;
+                hasLock = true;
+            }
+        }
+        child = actualRoom->leftChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->bottomChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+        child = actualRoom->rightChild;
+        if (child != nullptr && actualRoom->Equal(child->Parent)) {
+            toVisit.push(child);
+        }
+    }
+
+    nKeys -= hasKey ? 1 : 0;
+    nLocks -= hasLock ? 1 : 0;
+}
+*/
+
 void Dungeon::RemoveLockAndKey() {
     //std::cout << "Select between " << nKeys << std::endl;
     int removeKey = Constants::Next(nKeys);
@@ -370,7 +426,7 @@ void Dungeon::FixRoomList() {
 
     // Reset counts to 0
     nKeys = 0;
-    nLocks = 0;    
+    nLocks = 0;
     roomList.clear();
 
     // Perform BFS to reconstruct roomList

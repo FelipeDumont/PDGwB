@@ -117,7 +117,7 @@ int DFS::FindRoute(Dungeon* dun) {
 
     }
 
-
+    
     delete target;
     delete start;
 
@@ -271,7 +271,6 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
     for (Location* locked : locksLocation) {
         allLocksLocation.push_back(new Location(*locked));
     }
-    
 }
 
 std::vector<Location*> DFS::GetWalkableAdjacentSquares(int x, int y, int sizeX, int sizeY, const std::vector<std::vector<int>> map) {
@@ -298,6 +297,7 @@ std::vector<Location*> DFS::GetWalkableAdjacentSquares(int x, int y, int sizeX, 
         proposedLocations.push_back(new Location{x + 1, y});
     }
 
+    
     return proposedLocations;
 }
 

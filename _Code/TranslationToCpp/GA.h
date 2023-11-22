@@ -17,7 +17,7 @@ class GA {
 public:
     bool testingMode;;
     enum class MutationOp { insertChild, removeLeaf };
-    float Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
+    float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
     std::vector<int>  FindNKLR(Room *root, int *nRooms, int *specialCount);
     std::vector<Dungeon*> CreateDungeon();
     std::vector<Dungeon> GenerateDungeon();

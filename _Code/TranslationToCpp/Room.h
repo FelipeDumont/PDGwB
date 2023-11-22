@@ -39,7 +39,7 @@ public:
     
     Room* Copy();
     
-    void CleanRoom();
+    
     void FixBranch(std::vector<int> specialRooms);
     
     bool ValidateChild(Constants::Direction dir, RoomGrid roomGrid);
@@ -60,7 +60,6 @@ public:
     RoomGrid();
     Room* GetRoom(int x, int y);
     void SetRoom(int x, int y, Room* value);
-    void ClearGrid();
 };
 
 

@@ -36,14 +36,12 @@ public:
 class AStar {
 public:
 	// The A* algorithm for finding the route in the dungeon
-	int FindRoute(Dungeon* dun, int matrixOffset);
+	int FindRoute(Dungeon dun, int matrixOffset);
 	// Other AStar class methods and members
-
-
 };
 
 // Retrieves the walkable adjacent squares for a given location in the map
-std::vector<Location> GetWalkableAdjacentSquares(int x, int y, const std::vector<std::vector<int>>& map);
+std::vector<Location> GetWalkableAdjacentSquares(int x, int y, std::vector<std::vector<int>> map);
 
 // Finds the location with the lowest F score in a vector of locations
 int findLowestF(std::vector<Location> vec);
