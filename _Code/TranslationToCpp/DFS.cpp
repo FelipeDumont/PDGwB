@@ -2,176 +2,162 @@
 #include <algorithm>
 #include <iostream>
 
-/*
+
 int DFS::FindRoute(Dungeon* dun) {
-    neededLocks = 0;
-    nVisitedRooms = 0;
-    minX = Constants::MATRIXOFFSET;
-    minY = Constants::MATRIXOFFSET;
-    maxX = -Constants::MATRIXOFFSET;
-    maxY = -Constants::MATRIXOFFSET;
-    openList.clear();
-    ClosedList.clear();
-    allLocksLocation.clear();
-    path.clear();
-    keys.clear();
-    lockedRooms.clear();
-    InitiatePathFinding(dun);
+        // Puts the starting node in the list of open nodes and in the path
+        minX = Constants::MATRIXOFFSET;
+        minY = Constants::MATRIXOFFSET;
+        maxX = -Constants::MATRIXOFFSET;
+        maxY = -Constants::MATRIXOFFSET;
+        //
+        openList.clear();
+        ClosedList.clear();
+        path.clear();
+        keys.clear();
+        allLocksLocation.clear();
+        lockedRooms.clear();
+        InitiatePathFinding(dun);
 
-    openList.push_back(new Location(start->X, start->Y));
-    path.push_back(new Location(start->X, start->Y));
+        openList.push_back(start);
+        path.push_back(start);
+        neededLocks = 0;
+        nVisitedRooms = 0;
 
-    while (!openList.empty()) {
-        
-        for(Location* loc :openList){
-            std::cout << "open [" << loc->X << ", " << loc->Y << "] " << std::endl;
-        }
-        
-        Location* current = openList.front();
-        ValidateKeyRoom(current);
-        std::cout << "DFS current [" << current->X << ", " << current->Y << "] [" << target->X << ", " << target->Y << "]" << std::endl;
-
-        ClosedList.push_back(current);
-
-        if (((map[current->X][current->Y] >= 0) && (map[current->X][current->Y] < 100)) || (map[current->X][current->Y] == 102)) {
-            nVisitedRooms++;
-        }
-
-        for (auto locked : allLocksLocation) {
-            if (locked->X == current->X && locked->Y == current->Y) {
-                neededLocks++;
-                break;
-            }
-        }
-
-        openList.erase(openList.begin());
-
-        bool foundTarget = false;
-        for (int i = 0; i < ((int)ClosedList.size()); i++)
-        {
-            if(ClosedList[i]->X == target->X && ClosedList[i]->Y == target->Y){
-                foundTarget = true;
-            }
-        }
-        
-
-        if (!ClosedList.empty() && foundTarget) {
-            std::cout << "END SEARCH HERE ..." << std::endl;
-            break;
-        }
-
-        std::vector<Location*> adjacentSquares = GetWalkableAdjacentSquares(current->X, current->Y, sizeX, sizeY, map);
-
-        for(Location* loc : adjacentSquares){
-            std::cout << "Adjacants [" <<loc->X << ", " << loc->Y << "]" << std::endl;
-        }
-
-        std::cout << "Randoms " << adjacentSquares.size() << ": " ;
-        for (int i = adjacentSquares.size() - 1; i > 0; i--) {
-            int j = Constants::Next(0, i + 1);
-            Location* temp = adjacentSquares[i];
-            adjacentSquares[i] = adjacentSquares[j];
-            adjacentSquares[j] = temp;
-
-            std::cout << j << " ";
-        }
-
-        std::cout << "Finished Randoms, now clean" << std::endl;
-        for (auto it = adjacentSquares.begin(); it != adjacentSquares.end(); ) {
-            if (current->ParentX == (*it)->X && current->ParentY == (*it)->Y) {
-                it = adjacentSquares.erase(it);
-            } else {
-                ++it;
+        // std::cout << "A" << std::endl;
+        // Visit all open nodes until none is left
+        while (!openList.empty()) {
+            std::string so = "";
+            for (Location* loc : openList) {
+                so += "[" + std::to_string(loc->X) + ", " + std::to_string(loc->Y) + "] \n";
             }
 
-            // Check if the iterator is at the end before incrementing
-            if (it == adjacentSquares.end()) {
-                break;
+            // std::cout << so;
+
+            // get the first
+            Location* current = openList.front();
+
+            // Handles key rooms and their locks, if it is one
+            ValidateKeyRoom(current);
+
+            // add the current square to the closed list
+            ClosedList.push_back(current);
+            if ((map[current->X][current->Y] >= 0 && map[current->X][current->Y] < 100) || map[current->X][current->Y] == 102) {
+                // std::cout << "DFS current [" << current->X << ", " << current->Y << "] to [" << target->X << ", " << target->Y << "]" << std::endl;
+                nVisitedRooms++;
+            }
+            
+            // Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
+            for (const Location* locked : allLocksLocation) {
+                if (locked->X == current->X && locked->Y == current->Y) {
+                    neededLocks++;
+                    break;
+                }
+            }
+
+            // remove it from the open list
+            openList.erase(openList.begin());
+
+            // if we added the destination to the closed list, we've found a path
+            if (!ClosedList.empty()) {
+                if (std::find_if(ClosedList.begin(), ClosedList.end(), [this](Location* l) {
+                    return l->X == target->X && l->Y == target->Y;
+                }) != ClosedList.end()) {
+                    break;
+                }
+            }
+
+            // Check all adjacent squares from the current node
+            std::vector<Location*> adjacentSquares = GetWalkableAdjacentSquares(current->X, current->Y, sizeX, sizeY, map);
+
+            // Shuffle using Fisher-Yates shuffle
+            std::string randoms = "";
+            for (int i = adjacentSquares.size() - 1; i > 0; i--) {
+                int j = Constants::Next(0, i+1);
+                Location* temp = adjacentSquares[i];
+                adjacentSquares[i] = adjacentSquares[j];
+                adjacentSquares[j] = temp;
+
+                randoms += std::to_string(j)  + " " + std::to_string(Constants::currentValue) + "\n";
+            }
+
+            //std::cout << "Randoms: " << (adjacentSquares.size() - 1) << ":" << randoms;
+
+            for (auto it = adjacentSquares.begin(); it != adjacentSquares.end();) {
+                if (current->Parent == *it) {
+                    it = adjacentSquares.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            // std::cout << "Adjacent size " << adjacentSquares.size() << std::endl;
+            for (Location* adjacentSquare : adjacentSquares) {
+                // if this adjacent square is already in the closed list, ignore it
+                if (std::find_if(ClosedList.begin(), ClosedList.end(), [adjacentSquare](Location* l) {
+                    return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
+                }) != ClosedList.end()) {
+                    continue;
+                }
+
+                // if it's not in the open list...
+                if (std::find_if(openList.begin(), openList.end(), [adjacentSquare](Location* l) {
+                    return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
+                }) == openList.end()) {
+                    adjacentSquare->Parent = current;
+
+                    // and add it to the open list and add to your path
+                    openList.insert(openList.begin(), adjacentSquare);
+                    path.push_back(adjacentSquare);
+                } else {
+                    adjacentSquare->Parent = current;
+                }
             }
         }
-
-
-
-        std::cout << "adjacent size " << adjacentSquares.size() << std::endl;
-        for (Location* adjacentSquare : adjacentSquares) {
-            if (std::any_of(ClosedList.begin(), ClosedList.end(),
-                            [&adjacentSquare](const Location* l) {
-                                return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
-                            })) {
-                continue;
-            }
-
-            auto openListIt = std::find_if(openList.begin(), openList.end(),
-                                        [&adjacentSquare](const Location* l) {
-                                            return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
-                                        });
-
-            if (openListIt == openList.end()) {
-                std::cout << "adding " << adjacentSquare->X << ", " << adjacentSquare->Y << std::endl;
-                adjacentSquare->ParentX = current->X;
-                adjacentSquare->ParentY = current->Y;
-                openList.insert(openList.begin(), new Location(*adjacentSquare));
-                path.push_back(new Location(*adjacentSquare));
-            } else {
-                (*openListIt)->ParentX = current->X;
-                (*openListIt)->ParentY = current->Y;
-            }
-        }
-
+        return nVisitedRooms;
     }
-
-
-    delete target;
-    delete start;
-
-    // Clean up dynamically allocated memory in the ClosedList and openList
-    for (Location* loc : ClosedList) {
-        delete loc;
-    }
-    for (Location* loc : openList) {
-        delete loc;
-    }
-
-    return nVisitedRooms;
-}
 
 void DFS::ValidateKeyRoom(Location* current) {
     if (map[current->X][current->Y] > 0 && map[current->X][current->Y] < 100) {
+        // If there is still a lock to be opened (there may be more keys than locks in the level, so the verification is necessary), find its location and check if the key to open it is the one found
         if (!locksLocation.empty()) {
-            for (auto it = locksLocation.begin(); it != locksLocation.end(); ) {
-                Location locit = **it;
-                if (map[locit.X][locit.Y] == -map[current->X][current->Y]) {
-                    map[locit.X][locit.Y] = 100;
-                    auto lockedIt = std::find_if(allLocksLocation.begin(), allLocksLocation.end(),
-                                                 [&locit](Location* l) { return l->X == locit.X && l->Y == locit.Y; });
-
-                    if (lockedIt != allLocksLocation.end()) {
-                        neededLocks--;
-                        allLocksLocation.erase(lockedIt);
-                    }
-
+            auto it = locksLocation.begin();
+            while (it != locksLocation.end()) {
+                Location room = **it;
+                // If the key we found is the one that opens the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
+                if (map[room.X][room.Y] == -map[current->X][current->Y]) {
+                    map[room.X][room.Y] = 100;
+                    // Remove the lock from the unopened locks location list
                     it = locksLocation.erase(it);
-
-                    for (auto closedRoomIt = ClosedList.begin(); closedRoomIt != ClosedList.end(); ) {
-                        Location loc = **closedRoomIt;
-                        if ((*closedRoomIt)->X == locit.ParentX && (*closedRoomIt)->Y == locit.ParentY) {
+                    // Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
+                    auto closedRoomIt = ClosedList.begin();
+                    while (closedRoomIt != ClosedList.end()) {
+                        Location* closedRoom = *closedRoomIt;
+                        // If it was already closed, reopen it. Remove from the closed list and add to the open list
+                        if (closedRoom->X == room.Parent->X && closedRoom->Y == room.Parent->Y) {
                             closedRoomIt = ClosedList.erase(closedRoomIt);
                             nVisitedRooms--;
 
-                            openList.push_back(new Location(loc));
-
+                            openList.push_back(closedRoom);
+                            // If the closed room was a locked one, also remove one of the needed locks, as it is now reopened and will be revisited
+                            auto lockedIt = allLocksLocation.begin();
+                            while (lockedIt != allLocksLocation.end()) {
+                                Location locked = **lockedIt;
+                                if (locked.X == closedRoom->X && locked.Y == closedRoom->Y) {
+                                    neededLocks--;
+                                    lockedIt = allLocksLocation.erase(lockedIt);
+                                    break;
+                                } else {
+                                    ++lockedIt;
+                                }
+                            }
                             break;
                         } else {
                             ++closedRoomIt;
                         }
                     }
+                    break;
                 } else {
                     ++it;
-                }
-
-                // Check if the iterator is at the end before incrementing
-                if (it == locksLocation.end()) {
-                    break;
                 }
             }
         }
@@ -226,11 +212,13 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
                 }
                 // The sequential, positive index of the key is its representation
                 else if (type == RoomType::key) {
+                    // std::cout << "[ " << iPositive * 2 << ", " << jPositive * 2 << "] K"<< std::endl; 
                     map[iPositive * 2][jPositive * 2] = FindIndex(keys, actualRoom->keyToOpen) + 1;
                 }
                 // If the room is locked, the room is a normal room, only the corridor is locked.
                 // But if the lock is the last one in the sequential order, then the room is the objective
                 else if (type == RoomType::locked) {
+                    // std::cout << "[ " << iPositive * 2 << ", " << jPositive * 2 << "] L"<< std::endl; 
                     if (FindIndex(lockedRooms, actualRoom->keyToOpen) == lockedRooms.size() - 1) {
                         map[iPositive * 2][jPositive * 2] = 102;
                         target = new Location(iPositive * 2, jPositive * 2);
@@ -253,6 +241,8 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
                     if (type == RoomType::locked) {
                         Location* lockedLocation = new Location(x, y, new Location(2 * (parent->X - actualRoom->X) + 2 * iPositive,
                                                                                    2 * (parent->Y - actualRoom->Y) + 2 * jPositive));
+                        
+                        // std::cout << "[ " << x << ", " << y << "] Other"<< std::endl; 
                         locksLocation.push_back(lockedLocation);
 
                         int test = FindIndex(keys, actualRoom->keyToOpen);
@@ -263,6 +253,7 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
                             map[x][y] = -(test + 1);
                         }
                     } else {
+                        // std::cout << "[ " << x << ", " << y << "] Other 100"<< std::endl; 
                         map[x][y] = 100;
                     }
                 }
@@ -282,22 +273,22 @@ std::vector<Location*> DFS::GetWalkableAdjacentSquares(int x, int y, int sizeX, 
 
 
     if (y > 0 && map[x][y - 1] >= 0 && map[x][y - 1] != 101){
-        std::cout << x << " " << y-1 << " NEW " << std::endl;
+        // std::cout << x << " " << y-1 << " NEW " << std::endl;
         proposedLocations.push_back(new Location{x, y - 1});
     }
     if (y < (2 * sizeY) - 1 && map[x][y + 1] >= 0 && map[x][y + 1] != 101)
     {
-        std::cout << x << " " << y+1 << " NEW " << std::endl;
+        //std::cout << x << " " << y+1 << " NEW " << std::endl;
         proposedLocations.push_back(new Location{x, y + 1});
     }
     if (x > 0 && map[x - 1][y] >= 0 && map[x - 1][y] != 101)
     {
-        std::cout << x-1 << " " << y << " NEW " << std::endl;
+        //std::cout << x-1 << " " << y << " NEW " << std::endl;
         proposedLocations.push_back(new Location{x - 1, y});
     }
     if (x < (2 * sizeX) - 1 && map[x + 1][y] >= 0 && map[x + 1][y] != 101)
     {
-        std::cout << x+1 << " " << y << " NEW " << std::endl;
+        //std::cout << x+1 << " " << y << " NEW " << std::endl;
         proposedLocations.push_back(new Location{x + 1, y});
     }
 
@@ -317,5 +308,3 @@ int DFS::FindIndex(const std::vector<int> vec, int valueToFind) {
         return -1;
     }
 }
-
-*/

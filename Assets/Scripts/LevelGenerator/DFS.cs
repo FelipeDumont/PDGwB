@@ -30,12 +30,12 @@ namespace LevelGenerator
                     so += "[" + loc.X + ", " + loc.Y + "] \n";
                 }
 
-                UnityEngine.Debug.Log(so);
+                // UnityEngine.Debug.Log(so);
                 
 
                 // get the first
                 current = openList.First();
-                UnityEngine.Debug.Log("DFS current [" + current.X + ", " + current.Y + "] to [" + target.X + ", " + target.Y + "]" );
+                
                 //Handles key rooms and their locks, if it is one
                 validateKeyRoom(current);
 
@@ -43,6 +43,7 @@ namespace LevelGenerator
                 ClosedList.Add(current);
                 if (((map[current.X, current.Y] >= 0) && (map[current.X, current.Y] < 100)) || (map[current.X, current.Y] == 102))
                 {
+                    // UnityEngine.Debug.Log("DFS current [" + current.X + ", " + current.Y + "] to [" + target.X + ", " + target.Y + "]");
                     NVisitedRooms++;
                 }
                 //Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
@@ -78,10 +79,10 @@ namespace LevelGenerator
                     adjacentSquares[i] = adjacentSquares[j];
                     adjacentSquares[j] = temp;
 
-                    randoms += j + "\n";
+                    // randoms += j  + " RANDOM ID " + Util.randomSequence.Count + " \n";
                 }
 
-                UnityEngine.Debug.Log("Randoms: " + (adjacentSquares.Count - 1) +  ":" + randoms);
+                // UnityEngine.Debug.Log("Randoms: " + (adjacentSquares.Count - 1) +  ":" + randoms );
                 /*
                 string s = "";
                 foreach (Location loc in adjacentSquares)
@@ -103,7 +104,7 @@ namespace LevelGenerator
                     }
                 }
 
-                UnityEngine.Debug.Log("Adjacent size " + adjacentSquares.Count);
+                // UnityEngine.Debug.Log("Adjacent size " + adjacentSquares.Count);
                 foreach (var adjacentSquare in adjacentSquares)
                 {
                     // if this adjacent square is already in the closed list, ignore it
@@ -119,7 +120,7 @@ namespace LevelGenerator
                         adjacentSquare.Parent = current;
 
                         // and add it to the open list and add to your path
-                        // UnityEngine.Debug.Log("adding " + adjacentSquare);
+                        // UnityEngine.Debug.Log("adding " + adjacentSquare.X + ", " + adjacentSquare.Y);
                         openList.Insert(0, adjacentSquare);
                         path.Add(adjacentSquare);
                     }

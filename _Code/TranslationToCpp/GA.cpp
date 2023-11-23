@@ -6,11 +6,13 @@ void GA::Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2) {
     std::vector<int> parentPosL;
     do {
         int pos = Constants::Next(pop.size());
+        // std::cout << "Select: " << pos << std::endl;
         if (posHash.insert(pos).second) {
             parentPosL.push_back(pos);
         }
     } while (posHash.size() != 4);
-
+    // std::cout << "Parent Selection " << pop[parentPosL[0]]->fitness << " <" <<  pop[parentPosL[1]]->fitness << std::endl;
+    // std::cout << "Parent Selection " << pop[parentPosL[2]]->fitness << " <" <<  pop[parentPosL[3]]->fitness << std::endl;
     parent1 = pop[parentPosL[0]]->fitness < pop[parentPosL[1]]->fitness ? parentPosL[0] : parentPosL[1];
     parent2 = pop[parentPosL[2]]->fitness < pop[parentPosL[3]]->fitness ? parentPosL[2] : parentPosL[3];
 }
@@ -204,39 +206,14 @@ std::vector<int>  GA::FindNKLR(Room *root, int *nRooms, int *specialCount) {
 	return specialRooms;
 }
 
-/*
-void GA::Mutation(Dungeon* dun) {
-    try {
-        // Mutate keys, adding or removing a pair
-        bool willMutate = Constants::Next(101) <= Constants::MUTATION_RATE;
-        MutationOp op;
-        if (willMutate) {
-			
-            op = Constants::Next(101) <= Constants::MUTATION0_RATE ? MutationOp::insertChild : MutationOp::removeLeaf;
-            switch (op) {
-                case MutationOp::insertChild:
-					// std::cout << "ALK" << std::endl;
-                    dun->AddLockAndKey();
-                    break;
-                case MutationOp::removeLeaf:
-					// std::cout << "RlK" << std::endl;
-                    dun->RemoveLockAndKey();
-                    break;
-            }
-            dun->FixRoomList();
-        }
-
-    } catch (const std::exception& e) {
-        throw e;
-    }
-}
-*/
 
 
 
 float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixOffset) {
         AStar astar;
-		DFS dfs;
+		DFS dfs1;
+        DFS dfs2;
+        DFS dfs3;
         float indSym = 0;
         float fitness = 0;
 
@@ -245,19 +222,22 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
 			float avgUsedRooms = 0;
 			
             ind->neededLocks = astar.FindRoute(ind, matrixOffset);
-            std::cout << "Needed locks " << ind->neededLocks << std::endl;
+            // std::cout << "Needed locks " << ind->neededLocks << std::endl;
 
 			// Between 3 we calculate the avg
-			/*
-			std::cout << "dfs ... " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs.FindRoute(&ind);
-			std::cout << "dfs1 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs.FindRoute(&ind);
-			std::cout << "dfs2 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs.FindRoute(&ind);
-			std::cout << "dfs3 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			avgUsedRooms /= 3.0;
-			*/
+			
+			// std::cout << "dfs ... " << Constants::currentValue << std::endl;
+			avgUsedRooms += dfs1.FindRoute(ind);
+            
+			// std::cout << "dfs1 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
+			
+            avgUsedRooms += dfs2.FindRoute(ind);
+			// std::cout << "dfs2 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
+			avgUsedRooms += dfs3.FindRoute(ind);
+			//std::cout << "dfs3 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
+			
+            avgUsedRooms = round((avgUsedRooms / 3.0f) * 10000.0)/10000.0;
+			
 			
             if (ind->neededRooms > ind->roomList.size()) {
                 std::cout << "SOMETHING IS REALLY WRONG! Nrooms: " << std::to_string(ind->roomList.size()) << "  Used: " << std::to_string(ind->neededRooms)<< std::endl;
@@ -279,11 +259,10 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
             // std::cout << "Final Fitness NL: " << fitness << std::endl;
         }
 
-		return fitness;
+		return round(fitness * 10000.0)/10000.0;
     }
 
 std::vector<Dungeon*> GA::CreateDungeon() {
-    float minFitness = std::numeric_limits<float>::max();
     std::vector<Dungeon*> dungeons;
     
 
@@ -303,26 +282,33 @@ std::vector<Dungeon*> GA::CreateDungeon() {
 		
 		
         if (testingMode) {
-            std::cout << "GEN " << gen << std::endl;
+            // std::cout << "GEN " << gen << std::endl;
         }
 
+        int counter = 0;
         for (Dungeon* dungeon : dungeons) {
+            if (testingMode) {
+                
+                // std::cout << "Dungeon: " << counter << std::endl;
+                for (Room* r : dungeon->roomList) {
+                    // std::cout << r->roomId << " [" << r->X << "," << r->Y << " ]" << r->keyToOpen << std::endl;
+                }
+            }
+            
             float fitness = Fitness(dungeon, Constants::nV, Constants::nK, Constants::nL, Constants::lCoef, Constants::MATRIXOFFSET);
             dungeon->fitness = fitness;
 
-            if (testingMode) {
-                std::cout << fitness << std::endl;
-
-                for (Room* r : dungeon->roomList) {
-                    std::cout << r->roomId << " [" << r->X << "," << r->Y << " ]" << r->keyToOpen << std::endl;
-                }
+            if(testingMode){
+                // std::cout << fitness << std::endl;
             }
+            counter++;
         }
 
-		//
+		
         float auxFitness = dungeons[0]->fitness;
         int id = 0;
         for (int j = 0; j < dungeons.size(); j++) {
+            // std::cout << auxFitness << ">" << dungeons[j]->fitness << ((auxFitness > dungeons[j]->fitness)? "True":"False") << std::endl;
             if (auxFitness > dungeons[j]->fitness) {
                 auxFitness = dungeons[j]->fitness;
                 id = j;
@@ -331,7 +317,7 @@ std::vector<Dungeon*> GA::CreateDungeon() {
         aux = dungeons[id]->Copy();
 		
 		
-		std::cout << "Prepare next gen " << std::endl;
+		// std::cout << "Prepare next gen " << std::endl;
 		// NEXT GENERATION Preparation !
 		for (int i = 0; i < Constants::POP_SIZE/2; i++)
 		{
@@ -346,20 +332,20 @@ std::vector<Dungeon*> GA::CreateDungeon() {
 
 			// Evolution !!!
 			if ( testingMode){
-				std::cout << "Cross: " << Constants::currentValue << std::endl;
+				// std::cout << "Cross: " << parentA << " | " << parentB << " :::: " << Constants::currentValue << std::endl;
 			}
 			
 			Crossover(parent1, parent2);
             if ( testingMode){
-				std::cout << "End Crossover: " << Constants::currentValue << std::endl;
+				// std::cout << "End Crossover: " << Constants::currentValue << std::endl;
 			}
 			Mutation(parent1);
             if ( testingMode){
-				std::cout << "End Mutation 1: " << Constants::currentValue << std::endl;
+				// std::cout << "End Mutation 1: " << Constants::currentValue << std::endl;
 			}
 			Mutation(parent2);
 			if ( testingMode){
-				std::cout << "End Mutation 2: " << Constants::currentValue << std::endl;
+				// std::cout << "End Mutation 2: " << Constants::currentValue << std::endl;
 			}
 
 			parent1->FixRoomList();

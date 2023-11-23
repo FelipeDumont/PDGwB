@@ -298,9 +298,12 @@ namespace LevelGenerator
                 {
                     parentPosL.Add(pos);
                 }
+                // Debug.Log(pos);
             } while (posHash.Count != 4);
-            parent1 = pop[parentPosL[0]].fitness < pop[parentPosL[1]].fitness ? parentPosL[0] : parentPosL[1];
-            parent2 = pop[parentPosL[2]].fitness < pop[parentPosL[3]].fitness ? parentPosL[2] : parentPosL[3];
+            // Debug.Log("Parent Compare: " + (float)pop[parentPosL[0]].fitness + " < " + (float)pop[parentPosL[1]].fitness + " = " + ((float)pop[parentPosL[0]].fitness < (float)pop[parentPosL[1]].fitness));
+            // Debug.Log("Parent Compare: " + (float)pop[parentPosL[2]].fitness + " < " + (float)pop[parentPosL[3]].fitness + " = " + ((float)pop[parentPosL[2]].fitness < (float)pop[parentPosL[3]].fitness));
+            parent1 = (float)pop[parentPosL[0]].fitness < (float)pop[parentPosL[1]].fitness ? parentPosL[0] : parentPosL[1];
+            parent2 = (float)pop[parentPosL[2]].fitness < (float)pop[parentPosL[3]].fitness ? parentPosL[2] : parentPosL[3];
         }
 
         /* 
@@ -309,7 +312,7 @@ namespace LevelGenerator
          */
         public float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, int matrixOffset)
         {
-            
+            float fitness = 0.0f;
             float avgUsedRoom = 0.0f;
             DFS dfs;
             AStar astar = new AStar();
@@ -318,25 +321,27 @@ namespace LevelGenerator
             {
                 //The A* finds the number of locks needed to finish the dungeon using the heuristic that is close to optimal.
                 ind.neededLocks = astar.FindRoute(ind, matrixOffset);
-                Debug.Log("Neeeded locks: " + ind.neededLocks);
+                // Debug.Log("Neeeded locks: " + ind.neededLocks);
                 //Execute 3 times the DFS to minimize the randomness
                 //Execute them in parallel to make things faster
                 //The DFS finds the number of rooms needed to finish the dungeon be exploring blindly.
-                /*
-                Debug.Log("DFS ... "+ Util.randomSequence.Count);
+                
+                // Debug.Log("DFS ... "+ Util.randomSequence.Count);
                 dfs = new DFS(ind);
                 dfs.FindRoute();
                 avgUsedRoom += dfs.NVisitedRooms;
-                Debug.Log("DFS1 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                
+                // Debug.Log("DFS1 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                
                 dfs = new DFS(ind);
                 dfs.FindRoute();
                 avgUsedRoom += dfs.NVisitedRooms;
-                Debug.Log("DFS2 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                // Debug.Log("DFS2 " + avgUsedRoom + " | " + Util.randomSequence.Count);
                 dfs = new DFS(ind);
                 dfs.FindRoute();
                 avgUsedRoom += dfs.NVisitedRooms;
-                Debug.Log("DFS3 " + avgUsedRoom + " | " + Util.randomSequence.Count);
-                */
+                // Debug.Log("DFS3 " + avgUsedRoom + " | " + Util.randomSequence.Count);
+                
                 // Main Change, the Algorithm will do it one at a time !
                 /*
                 if (Constants.modified == false)
@@ -358,7 +363,7 @@ namespace LevelGenerator
                 */
 
                 // Normal For ???
-                ind.neededRooms = avgUsedRoom / 3.0f;
+                ind.neededRooms = Mathf.Round((avgUsedRoom / 3.0f)*10000.0f)/10000.0f;
 
                 //If we need more rooms than the rooms that really exist, something is wrong.
                 if (ind.neededRooms > ind.RoomList.Count)
@@ -375,13 +380,16 @@ namespace LevelGenerator
                         + System.Math.Abs(lCoef - ind.AvgChildren) * 5))
                      + " O " + ((ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count * 0.8f - ind.neededRooms)));
                 */
-                return (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
+                fitness= (2 * (System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks)
                         + System.Math.Abs(lCoef - ind.AvgChildren) * 5) + (ind.nLocks - ind.neededLocks) + System.Math.Abs(ind.RoomList.Count * 0.8f - ind.neededRooms));
+
             }
 
             //If there are no locks, the fitness is based only in the map layout
             else
-                return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
+                fitness = (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
+
+            return Mathf.Round(fitness * 10000.0f) / 10000.0f;
         }
     }
 }

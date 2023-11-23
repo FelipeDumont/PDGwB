@@ -13,6 +13,7 @@ extern "C" {
 
 int main(int argc, char* argv[]){
 
+    
     if(argc >= 12){
         GA ga;
 
@@ -32,7 +33,11 @@ int main(int argc, char* argv[]){
         // Assign internally
         ga.testingMode = testingMode;
 
-        std::cout << Constants::POP_SIZE << std::endl;
+        std::cout << "testing mode ? " << testingMode << std::endl;
+        if(testingMode){
+            std::cout << "popsize" << Constants::POP_SIZE << std::endl;
+            std::cout << "Testing mode" << ga.testingMode << std::endl;
+        }
         // Finally we check the random sequence
         if(argc == 13 && useForceRandomSequence){
             std::string fileName = argv[12];// "RandomSequence.txt";

@@ -85,7 +85,7 @@ namespace LevelGenerator
             proposedLocations = proposedLocations.Where(l => (map[l.X, l.Y] >= 0 && map[l.X, l.Y] != 101)).ToList();
             foreach(var ploc in proposedLocations)
             {
-                Debug.Log(ploc.X + " " + ploc.Y + " NEW");
+                // Debug.Log(ploc.X + " " + ploc.Y + " NEW");
             }
 
             return proposedLocations;
@@ -116,9 +116,6 @@ namespace LevelGenerator
                                 {
                                     ClosedList.Remove(closedRoom);
                                     nVisitedRooms--;
-                                    //Console.SetCursorPosition(0, 15 + auxoffset);
-                                    //auxoffset += 1;
-                                    //Console.WriteLine("Removed!");
 
                                     openList.Add(closedRoom);
                                     //If the closed room was a locked one, also remove one of the needed locks, as it is now reopen and will be revisited
