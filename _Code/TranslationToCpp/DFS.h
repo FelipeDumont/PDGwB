@@ -13,11 +13,11 @@ public:
     Location* start;
     std::vector<Location*> openList;
     std::vector<Location*> ClosedList;
-    std::vector<Location*> allLocksLocation;
     std::vector<Location*> path;
     std::vector<int> keys;
     std::vector<int> lockedRooms;
-    std::vector<Location*> locksLocation;
+    std::vector<Location> locksLocation;
+    std::vector<Location> allLocksLocation;
     Location* target;
 
     int FindRoute(Dungeon* dun);

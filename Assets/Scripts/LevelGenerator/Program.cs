@@ -68,16 +68,20 @@ namespace LevelGenerator
                 int counter = 0;
                 foreach (Dungeon dun in dungeons)
                 {
-                    dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                    //Debug.Log("Dungeon " + counter + " F: " + dun.fitness);
-                    
-                    
                     string data = "";
-                    foreach(Room r in dun.RoomList)
+                    foreach (Room r in dun.RoomList)
                     {
                         data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                     }
-                    // Debug.Log(data);
+                    Debug.Log("Dungeon " + counter);
+                    Debug.Log(data);
+
+                    dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                    Debug.Log("Dungeon " + counter + " F: " + dun.fitness);
+                    
+                    
+                   
+                    
                     counter++;
                 }
 
@@ -164,15 +168,16 @@ namespace LevelGenerator
             Debug.Log("Final generation: ");
             foreach (Dungeon dun in dungeons)
             {
-                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                
-                Debug.Log(dun.fitness);
                 string data = "";
                 foreach (Room r in dun.RoomList)
                 {
                     data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                 }
-                Debug.Log(data);
+                Debug.Log("Dungeon " + data);
+                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                
+                Debug.Log(dun.fitness);
+                
                 
 
                 fitnessValues.Add(dun.fitness);

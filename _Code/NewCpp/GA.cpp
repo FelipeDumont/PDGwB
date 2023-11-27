@@ -224,27 +224,12 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
         float indSym = 0;
         float fitness = 0;
 
-        DFS dfs1;
-        DFS dfs2;
-        DFS dfs3;
-
         if (ind->nLocks > 0) {
 			
 			float avgUsedRooms = 0;
 			
-            // std::cout << "ASTAR" << std::endl;
             ind->neededLocks = astar.FindRoute(ind, matrixOffset);
 			
-            // std::cout << "DFS ..." << std::endl;
-			// std::cout << "dfs ... " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs1.FindRoute(ind);
-			// std::cout << "dfs1 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-            avgUsedRooms += dfs2.FindRoute(ind);
-			// std::cout << "dfs2 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs3.FindRoute(ind);
-			//std::cout << "dfs3 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			
-            avgUsedRooms = round((avgUsedRooms / 3.0f) * 10000.0)/10000.0;
 			
             if (ind->neededRooms > ind->roomList.size()) {
                 std::cout << "SOMETHING IS REALLY WRONG! Nrooms: " << std::to_string(ind->roomList.size()) << "  Used: " << std::to_string(ind->neededRooms)<< std::endl;
@@ -253,11 +238,8 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
                 std::cout << "SOMETHING IS REALLY WRONG!"<< std::endl;
             }
 			
-			// fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
-			// fitness += (ind->nLocks - ind->neededLocks);
-
-            fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
-			fitness += (ind->nLocks - ind->neededLocks) + std::abs(ind->roomList.size() * 0.8 - avgUsedRooms);
+			fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
+			fitness += (ind->nLocks - ind->neededLocks);
 			
         } else {
 			fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) +
@@ -294,15 +276,12 @@ std::vector<Dungeon*> GA::CreateDungeon() {
         
         int counter = 0;
         for (Dungeon* dungeon : dungeons) {
-            
             if (testingMode) {
                 
                 // std::cout << "Dungeon: " << counter << std::endl;
-                /*
                 for (Room* r : dungeon->roomList) {
-                    std::cout << r->roomId << " [" << r->X << "," << r->Y << " ]" << r->keyToOpen << std::endl;
+                    // std::cout << r->roomId << " [" << r->X << "," << r->Y << " ]" << r->keyToOpen << std::endl;
                 }
-                */
             }
             
             float fitness = Fitness(dungeon, Constants::nV, Constants::nK, Constants::nL, Constants::lCoef, Constants::MATRIXOFFSET);
@@ -406,7 +385,7 @@ std::vector<Dungeon*> GA::CreateDungeon() {
     
     float auxFitness = dungeons[0]->fitness;
     int id = 0;
-    // std::cout << "FINAL DUNGEONS" << std::endl << std::endl;
+    std::cout << "FINAL DUNGEONS" << std::endl << std::endl;
     for (int j = 0; j < dungeons.size(); j++) {
         std::cout << "Dungeon " << j <<  std::endl;
         float fitness = Fitness(dungeons[j], Constants::nV, Constants::nK, Constants::nL, Constants::lCoef, Constants::MATRIXOFFSET);

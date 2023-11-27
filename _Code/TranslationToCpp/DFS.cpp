@@ -4,117 +4,154 @@
 
 
 int DFS::FindRoute(Dungeon* dun) {
-        // Puts the starting node in the list of open nodes and in the path
-        minX = Constants::MATRIXOFFSET;
-        minY = Constants::MATRIXOFFSET;
-        maxX = -Constants::MATRIXOFFSET;
-        maxY = -Constants::MATRIXOFFSET;
-        //
-        openList.clear();
-        ClosedList.clear();
-        path.clear();
-        keys.clear();
-        allLocksLocation.clear();
-        lockedRooms.clear();
-        InitiatePathFinding(dun);
+    // Puts the starting node in the list of open nodes and in the path
+    minX = Constants::MATRIXOFFSET;
+    minY = Constants::MATRIXOFFSET;
+    maxX = -Constants::MATRIXOFFSET;
+    maxY = -Constants::MATRIXOFFSET;
+    //
+    openList.clear();
+    ClosedList.clear();
+    path.clear();
+    keys.clear();
+    allLocksLocation.clear();
+    lockedRooms.clear();
+    InitiatePathFinding(dun);
 
-        openList.push_back(start);
-        path.push_back(start);
-        neededLocks = 0;
-        nVisitedRooms = 0;
+    openList.push_back(start);
+    path.push_back(start);
+    neededLocks = 0;
+    nVisitedRooms = 0;
 
-        // std::cout << "A" << std::endl;
-        // Visit all open nodes until none is left
-        while (!openList.empty()) {
-            std::string so = "";
-            for (Location* loc : openList) {
-                so += "[" + std::to_string(loc->X) + ", " + std::to_string(loc->Y) + "] \n";
-            }
+    // std::cout << "A" << std::endl;
+    // Visit all open nodes until none is left
+    
+    while (!openList.empty()) {
 
-            // std::cout << so;
+        
+        std::string so = "";
+        for (Location* loc : openList) {
+            so += "[" + std::to_string(loc->X) + ", " + std::to_string(loc->Y) + "] \n";
+        }
 
-            // get the first
-            Location* current = openList.front();
+        // std::cout << so;
 
-            // Handles key rooms and their locks, if it is one
-            ValidateKeyRoom(current);
+        // get the first
+        Location* current = openList.front();
 
-            // add the current square to the closed list
-            ClosedList.push_back(current);
-            if ((map[current->X][current->Y] >= 0 && map[current->X][current->Y] < 100) || map[current->X][current->Y] == 102) {
-                // std::cout << "DFS current [" << current->X << ", " << current->Y << "] to [" << target->X << ", " << target->Y << "]" << std::endl;
-                nVisitedRooms++;
-            }
-            
-            // Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
-            for (const Location* locked : allLocksLocation) {
-                if (locked->X == current->X && locked->Y == current->Y) {
-                    neededLocks++;
-                    break;
-                }
-            }
+        // Handles key rooms and their locks, if it is one
+        ValidateKeyRoom(current);
 
-            // remove it from the open list
-            openList.erase(openList.begin());
-
-            // if we added the destination to the closed list, we've found a path
-            if (!ClosedList.empty()) {
-                if (std::find_if(ClosedList.begin(), ClosedList.end(), [this](Location* l) {
-                    return l->X == target->X && l->Y == target->Y;
-                }) != ClosedList.end()) {
-                    break;
-                }
-            }
-
-            // Check all adjacent squares from the current node
-            std::vector<Location*> adjacentSquares = GetWalkableAdjacentSquares(current->X, current->Y, sizeX, sizeY, map);
-
-            // Shuffle using Fisher-Yates shuffle
-            std::string randoms = "";
-            for (int i = adjacentSquares.size() - 1; i > 0; i--) {
-                int j = Constants::Next(0, i+1);
-                Location* temp = adjacentSquares[i];
-                adjacentSquares[i] = adjacentSquares[j];
-                adjacentSquares[j] = temp;
-
-                randoms += std::to_string(j)  + " " + std::to_string(Constants::currentValue) + "\n";
-            }
-
-            //std::cout << "Randoms: " << (adjacentSquares.size() - 1) << ":" << randoms;
-
-            for (auto it = adjacentSquares.begin(); it != adjacentSquares.end();) {
-                if (current->Parent == *it) {
-                    it = adjacentSquares.erase(it);
-                } else {
-                    ++it;
-                }
-            }
-
-            // std::cout << "Adjacent size " << adjacentSquares.size() << std::endl;
-            for (Location* adjacentSquare : adjacentSquares) {
-                // if this adjacent square is already in the closed list, ignore it
-                if (std::find_if(ClosedList.begin(), ClosedList.end(), [adjacentSquare](Location* l) {
-                    return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
-                }) != ClosedList.end()) {
-                    continue;
-                }
-
-                // if it's not in the open list...
-                if (std::find_if(openList.begin(), openList.end(), [adjacentSquare](Location* l) {
-                    return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
-                }) == openList.end()) {
-                    adjacentSquare->Parent = current;
-
-                    // and add it to the open list and add to your path
-                    openList.insert(openList.begin(), adjacentSquare);
-                    path.push_back(adjacentSquare);
-                } else {
-                    adjacentSquare->Parent = current;
-                }
+        // add the current square to the closed list
+        ClosedList.push_back(current);
+        if ((map[current->X][current->Y] >= 0 && map[current->X][current->Y] < 100) || map[current->X][current->Y] == 102) {
+            // std::cout << "DFS current [" << current->X << ", " << current->Y << "] to [" << target->X << ", " << target->Y << "]" << std::endl;
+            nVisitedRooms++;
+        }
+        
+        // Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
+        for (const Location locked : allLocksLocation) {
+            if (locked.X == current->X && locked.Y == current->Y) {
+                neededLocks++;
+                break;
             }
         }
-        return nVisitedRooms;
+
+        // remove it from the open list
+        openList.erase(openList.begin());
+
+        // if we added the destination to the closed list, we've found a path
+        if (!ClosedList.empty()) {
+            if (std::find_if(ClosedList.begin(), ClosedList.end(), [this](Location* l) {
+                return l->X == target->X && l->Y == target->Y;
+            }) != ClosedList.end()) {
+                break;
+            }
+        }
+
+        
+        // Check all adjacent squares from the current node
+        std::vector<Location*> adjacentSquares = GetWalkableAdjacentSquares(current->X, current->Y, sizeX, sizeY, map);
+
+        // Shuffle using Fisher-Yates shuffle
+        std::string randoms = "";
+        for (int i = adjacentSquares.size() - 1; i > 0; i--) {
+            int j = Constants::Next(0, i+1);
+            Location* temp = adjacentSquares[i];
+            adjacentSquares[i] = adjacentSquares[j];
+            adjacentSquares[j] = temp;
+
+            randoms += std::to_string(j)  + " " + std::to_string(Constants::currentValue) + "\n";
+        }
+
+        //std::cout << "Randoms: " << (adjacentSquares.size() - 1) << ":" << randoms;
+        
+        for (auto it = adjacentSquares.begin(); it != adjacentSquares.end();) {
+            if (current->Parent == *it) {
+                it = adjacentSquares.erase(it);
+                delete *it;
+            } else {
+                ++it;
+            }
+        }
+
+        
+        // std::cout << "Adjacent size " << adjacentSquares.size() << std::endl;
+        for (Location* adjacentSquare : adjacentSquares) {
+            
+            // if this adjacent square is already in the closed list, ignore it
+            if (std::find_if(ClosedList.begin(), ClosedList.end(), [adjacentSquare](Location* l) {
+                return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
+            }) != ClosedList.end()) {
+                delete adjacentSquare;
+                continue;
+            }
+
+            // if it's not in the open list...
+            if (std::find_if(openList.begin(), openList.end(), [adjacentSquare](Location* l) {
+                return l->X == adjacentSquare->X && l->Y == adjacentSquare->Y;
+            }) == openList.end()) {
+                adjacentSquare->Parent = current;
+
+                // and add it to the open list and add to your path
+                openList.insert(openList.begin(), adjacentSquare);
+                path.push_back(adjacentSquare);
+            } else {
+                // adjacentSquare->Parent = current;
+                delete adjacentSquare;
+            }
+            
+        }
+        
     }
+        
+    path.clear(); // Distributed in the Open or closed list
+    locksLocation.clear();
+
+    // Delete dynamically allocated memory in locksLocation
+    for (Location locked : allLocksLocation) {
+        if(locked.Parent != nullptr){
+            delete locked.Parent;
+        }   
+    }
+
+    for (Location* loc : openList){
+        loc->Parent = nullptr;
+        delete loc;
+    }
+    
+
+    for (Location* loc : ClosedList){
+        loc->Parent = nullptr;
+        delete loc;
+    }
+
+    openList.clear();
+    ClosedList.clear();
+
+    delete target;
+    return nVisitedRooms;
+}
 
 void DFS::ValidateKeyRoom(Location* current) {
     if (map[current->X][current->Y] > 0 && map[current->X][current->Y] < 100) {
@@ -122,7 +159,7 @@ void DFS::ValidateKeyRoom(Location* current) {
         if (!locksLocation.empty()) {
             auto it = locksLocation.begin();
             while (it != locksLocation.end()) {
-                Location room = **it;
+                Location room = *it;
                 // If the key we found is the one that opens the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
                 if (map[room.X][room.Y] == -map[current->X][current->Y]) {
                     map[room.X][room.Y] = 100;
@@ -141,7 +178,7 @@ void DFS::ValidateKeyRoom(Location* current) {
                             // If the closed room was a locked one, also remove one of the needed locks, as it is now reopened and will be revisited
                             auto lockedIt = allLocksLocation.begin();
                             while (lockedIt != allLocksLocation.end()) {
-                                Location locked = **lockedIt;
+                                Location locked = *lockedIt;
                                 if (locked.X == closedRoom->X && locked.Y == closedRoom->Y) {
                                     neededLocks--;
                                     lockedIt = allLocksLocation.erase(lockedIt);
@@ -239,7 +276,7 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
                     int y = parent->Y - actualRoom->Y + 2 * jPositive;
 
                     if (type == RoomType::locked) {
-                        Location* lockedLocation = new Location(x, y, new Location(2 * (parent->X - actualRoom->X) + 2 * iPositive,
+                        Location lockedLocation = Location(x, y, new Location(2 * (parent->X - actualRoom->X) + 2 * iPositive,
                                                                                    2 * (parent->Y - actualRoom->Y) + 2 * jPositive));
                         
                         // std::cout << "[ " << x << ", " << y << "] Other"<< std::endl; 
@@ -262,8 +299,8 @@ void DFS::InitiatePathFinding(Dungeon* dun) {
     }
 
     // Add all the locks location to the list that will hold their values through the execution of the algorithm
-    for (Location* locked : locksLocation) {
-        allLocksLocation.push_back(new Location(*locked));
+    for (Location locked : locksLocation) {
+        allLocksLocation.push_back(locked);
     }
     
 }

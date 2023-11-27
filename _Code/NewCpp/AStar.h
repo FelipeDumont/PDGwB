@@ -17,7 +17,7 @@ public:
 	int F = 0; // Total estimated cost of the location
 	int G = 0; // Cost from the start location to the current location
 	int H = 0; // Heuristic cost from the current location to the target location
-	Location* Parent = nullptr; // Pointer to the parent location
+	Location* Parent; // Pointer to the parent location
 
 	// Define the equality operator for Location objects
 	bool operator==(Location other) const {

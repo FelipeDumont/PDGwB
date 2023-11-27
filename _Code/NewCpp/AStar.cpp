@@ -292,8 +292,10 @@ int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
     for (Location& locked : allLocksLocation) {
         if(locked.Parent != nullptr){
             delete locked.Parent;
-        }   
+        }
+        
     }
+    
 
     for (Location* loc : openList){
         loc->Parent = nullptr;
@@ -310,6 +312,8 @@ int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
     closedList.clear();
 
     delete target;
+
+
     return neededLocks;
 }
 
