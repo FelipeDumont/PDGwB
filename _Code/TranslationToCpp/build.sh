@@ -20,9 +20,11 @@ elif [ "$1" = "1" ]; then
 	# bash build.sh 1 10 5 4 5 1 1 1.2 10 false false false RandomSequence.txt
 	# valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 	time ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
+	# valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 elif [ "$1" = "2" ]; then
 	echo "Just Run"
 	time ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
+	# valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 elif [ "$1" = "Test" ]; then
 	echo "TESTING ALL INSTANCES !!! First Build!"
 	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp DFS.cpp -o pdgwb
@@ -39,8 +41,10 @@ elif [ "$1" = "Test" ]; then
 	
 else
 	echo "Just Build DLL and SO"
-	g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.so
-	g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.dll
+	g++ -fPIC -O3 -shared main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp DFS.cpp -o pdgwb.so
+	python3 TestDungeons.py 100 10 4 6 1 1 1.5 10
+	# g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.so
+	# g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.dll
 fi
 
 

@@ -19,7 +19,7 @@ public:
     enum class MutationOp { insertChild, removeLeaf };
     float Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
     std::vector<int>  FindNKLR(Room *root, int *nRooms, int *specialCount);
-    std::vector<Dungeon*> CreateDungeon();
+    Dungeon* CreateDungeon();
     std::vector<Dungeon> GenerateDungeon();
 
     void Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2);

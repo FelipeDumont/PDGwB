@@ -47,6 +47,10 @@ public:
 	static std::vector<int> forcedRandomSequence;
 	static int currentValue;
 
+	// Main configurations !!!
+	static bool useDFS;
+
+	
 	// Enumeration for directions
 	enum Direction {
 		right = 0,

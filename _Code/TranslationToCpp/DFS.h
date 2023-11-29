@@ -20,7 +20,7 @@ public:
     std::vector<Location> allLocksLocation;
     Location* target;
 
-    int FindRoute(Dungeon* dun);
+    int FindRouteDFS(Dungeon* dun);
     void ValidateKeyRoom(Location* current);
     void InitiatePathFinding(Dungeon* dun);
     int FindIndex(const std::vector<int> vec, int valueToFind);

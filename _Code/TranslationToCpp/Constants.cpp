@@ -17,6 +17,8 @@ bool Constants::isForced = false;
 std::vector<int> Constants::forcedRandomSequence;
 int Constants::currentValue = 0;
 
+bool Constants::useDFS = false;
+
 int Constants::getNextId(){
 	return ID++;
 }

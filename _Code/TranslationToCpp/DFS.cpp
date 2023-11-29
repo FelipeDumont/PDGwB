@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-int DFS::FindRoute(Dungeon* dun) {
+int DFS::FindRouteDFS(Dungeon* dun) {
     // Puts the starting node in the list of open nodes and in the path
     minX = Constants::MATRIXOFFSET;
     minY = Constants::MATRIXOFFSET;

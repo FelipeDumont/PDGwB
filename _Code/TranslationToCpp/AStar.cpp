@@ -28,7 +28,7 @@ Location::Location(int X,int Y, int F, int G, int H,Location* parent){
     this->Parent = parent;
 }
 
-int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
+int AStar::FindRouteAStar(Dungeon* dun, int matrixOffset) {
 
     // The path through the dungeon
     std::vector<Location*> path;

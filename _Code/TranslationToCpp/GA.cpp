@@ -224,41 +224,22 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
         float indSym = 0;
         float fitness = 0;
 
-        DFS dfs1;
-        DFS dfs2;
-        DFS dfs3;
-
         if (ind->nLocks > 0) {
-			
-			float avgUsedRooms = 0;
-			
-            // std::cout << "ASTAR" << std::endl;
-            ind->neededLocks = astar.FindRoute(ind, matrixOffset);
-			
-            // std::cout << "DFS ..." << std::endl;
-			// std::cout << "dfs ... " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs1.FindRoute(ind);
-			// std::cout << "dfs1 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-            avgUsedRooms += dfs2.FindRoute(ind);
-			// std::cout << "dfs2 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			avgUsedRooms += dfs3.FindRoute(ind);
-			//std::cout << "dfs3 " << avgUsedRooms  << " | " << Constants::currentValue << std::endl;
-			
-            avgUsedRooms = round((avgUsedRooms / 3.0f) * 10000.0)/10000.0;
-			
-            if (ind->neededRooms > ind->roomList.size()) {
-                std::cout << "SOMETHING IS REALLY WRONG! Nrooms: " << std::to_string(ind->roomList.size()) << "  Used: " << std::to_string(ind->neededRooms)<< std::endl;
-            }
-            if (ind->neededLocks > ind->nLocks) {
-                std::cout << "SOMETHING IS REALLY WRONG!"<< std::endl;
-            }
-			
-			// fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
-			// fitness += (ind->nLocks - ind->neededLocks);
+            ind->neededLocks = astar.FindRouteAStar(ind, matrixOffset);
+			fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
+            fitness += (ind->nLocks - ind->neededLocks);
 
-            fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) + (std::abs(lCoef - ind->avgChildren)*5))) ;
-			fitness += (ind->nLocks - ind->neededLocks) + std::abs(ind->roomList.size() * 0.8 - avgUsedRooms);
-			
+            if(Constants::useDFS){
+                DFS dfs1;
+                DFS dfs2;
+                DFS dfs3;
+                float avgUsedRooms = 0;
+                avgUsedRooms += dfs1.FindRouteDFS(ind);
+                avgUsedRooms += dfs2.FindRouteDFS(ind);
+                avgUsedRooms += dfs3.FindRouteDFS(ind);
+                avgUsedRooms = round((avgUsedRooms / 3.0f) * 10000.0)/10000.0;
+                fitness += std::abs(ind->roomList.size() * 0.8 - avgUsedRooms);
+            }
         } else {
 			fitness = (2 * (std::abs(nV - ((int)ind->roomList.size())) + std::abs(nK - ind->nKeys) + std::abs(nL - ind->nLocks) +
 					std::abs(lCoef - ind->avgChildren)));
@@ -267,9 +248,9 @@ float GA::Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixO
 		return round(fitness * 10000.0)/10000.0;
     }
 
-std::vector<Dungeon*> GA::CreateDungeon() {
+Dungeon* GA::CreateDungeon() {
     std::vector<Dungeon*> dungeons;
-    
+    Dungeon* aux;
 
     for (int dungeonID = 0; dungeonID < Constants::POP_SIZE; dungeonID++) {
         Dungeon* individual = new Dungeon();
@@ -286,7 +267,6 @@ std::vector<Dungeon*> GA::CreateDungeon() {
     
     for (int gen = 0; gen < Constants::GENERATIONS; gen++) {
 		std::vector<Dungeon*> nexGeneration;
-		Dungeon* aux;
 		
         if (testingMode) {
             // std::cout << "GEN " << gen << std::endl;
@@ -408,7 +388,9 @@ std::vector<Dungeon*> GA::CreateDungeon() {
     int id = 0;
     // std::cout << "FINAL DUNGEONS" << std::endl << std::endl;
     for (int j = 0; j < dungeons.size(); j++) {
-        std::cout << "Dungeon " << j <<  std::endl;
+        if (testingMode) {
+            std::cout << "Dungeon " << j <<  std::endl;
+        }
         float fitness = Fitness(dungeons[j], Constants::nV, Constants::nK, Constants::nL, Constants::lCoef, Constants::MATRIXOFFSET);
         dungeons[j]->fitness = fitness;
 
@@ -420,20 +402,21 @@ std::vector<Dungeon*> GA::CreateDungeon() {
             }
         }
 
-        if (auxFitness < dungeons[j]->fitness) {
+        if (auxFitness > dungeons[j]->fitness) {
             auxFitness = dungeons[j]->fitness;
             id = j;
         }
     }
-    
-	
-    // Need to delete them to test
-   for (Dungeon* dungeon : dungeons) {
+
+    aux = dungeons[id]->Copy();
+
+    for (Dungeon* dungeon : dungeons) {
         delete dungeon;
     }
     dungeons.clear();
 
-    return dungeons;
+
+    return aux;
 }
 
 
@@ -500,11 +483,9 @@ void GA::BasicTests(){
     for (int i = 0; i < Constants::GENERATIONS; i++)
     {
         AStar astar;
-        int a = astar.FindRoute(newDungeon,Constants::MATRIXOFFSET);
+        int a = astar.FindRouteAStar(newDungeon,Constants::MATRIXOFFSET);
     }
     
     std::cout << "Finished the test ..." << std::endl;
     delete newDungeon;
-    
-
 }
