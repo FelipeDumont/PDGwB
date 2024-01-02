@@ -1,12 +1,12 @@
 
-#include "RoomFactory.h"
 #include "Constants.h"
 #include "Dungeon.h"
 #include <unordered_map>
 
+
 Dungeon::Dungeon() {
 	roomList.clear();
-    Room* root = RoomFactory::CreateRoot();
+    Room* root = new Room(RoomType::normal, 0, 0);
 	roomList.push_back(root);
     roomGrid.SetRoom(0,0,root);
 	
@@ -48,6 +48,8 @@ Dungeon* Dungeon::Copy() {
     copyDungeon->desiredKeys = desiredKeys;
     copyDungeon->avgChildren = avgChildren;
     copyDungeon->fitness = fitness;
+    copyDungeon->finalRoomX = finalRoomX;
+    copyDungeon->finalRoomY = finalRoomY;
 
     std::unordered_map<Room*, Room*> roomMap;  // Map to store old Room pointers to corresponding new Room pointers
     roomMap[nullptr] = nullptr;
@@ -111,54 +113,41 @@ void Dungeon::GenerateRooms() {
         toVisit.pop();
         int actualDepth = actualRoom->depth;
         // Si se ha alcanzado la profundidad máxima permitida, se deja de crear hijos
-        if (actualDepth > Constants::MAX_DEPTH) {
+        if (actualDepth > Constants::MAX_DEPTH || this->roomList.size() >= Constants::nV) {
                 while (!toVisit.empty()) {
                     toVisit.pop();
                 }
                 break;
         }	
-        
-        // Comprobar cuántos hijos tendrá el nodo, si los tiene.
-        prob = Constants::Next(100);
-        // std::cout << "GenerateRooms A (prob)" << prob << std::endl;
-        // La probabilidad de que el nodo padre tenga hijos es del 100%, luego, en cada altura, se añade un 10% de probabilidad de que NO tenga hijos.
-        // Si un nodo tiene un hijo, se crea con RoomFactory, se inserta como hijo del nodo actual en el lugar correcto
-        // También se encola para ser visitado más tarde y se agrega a la lista de habitaciones de este calabozo.
-        if (prob <= (Constants::PROB_HAS_CHILD * (1 - actualDepth / (Constants::MAX_DEPTH + 1)))) {
             
-            Room* child = nullptr; //Room(RoomType::normal, -1, 0);
-            int prob = Constants::Next(3);
-            // std::cout << "GenerateRooms B (dir)" << prob << std::endl;
-            Constants::Direction dir = static_cast<Constants::Direction>(prob);
+        Room* child = nullptr; //Room(RoomType::normal, -1, 0);
+        int prob = Constants::Next(3);
+        Constants::Direction dir = static_cast<Constants::Direction>(prob);
 
-            prob = Constants::Next(101);
-            // std::cout << "GenerateRooms C (prob)" << prob << std::endl;
+        prob = Constants::Next(101);
 
-            
-            if (prob < Constants::PROB_1_CHILD) {
-                // Enqueue internamente
-                InstantiateRoom(child, actualRoom, dir);
-            } else if (prob < (Constants::PROB_1_CHILD + Constants::PROB_2_CHILD)) {
-                // Enqueue internamente
-                InstantiateRoom(child, actualRoom, dir);
-                Constants::Direction dir2;
-                do {
-                    prob = Constants::Next(3);
-                    // std::cout << "GenerateRooms D (dir)" << prob << std::endl;
-                    dir2 = static_cast<Constants::Direction>(prob);
-                } while (dir == dir2);
-                InstantiateRoom(child, actualRoom, dir2);
-            } else {
-                InstantiateRoom(child, actualRoom, Constants::Direction::right);
-                InstantiateRoom(child, actualRoom, Constants::Direction::down);
-                InstantiateRoom(child, actualRoom, Constants::Direction::left);
-            }
+        // Depending on the probability add 1, 2 or 3 Rooms
+        if (prob < Constants::PROB_1_CHILD) {
+            InstantiateRoom(child, actualRoom, dir);
+        } else if (prob < (Constants::PROB_1_CHILD + Constants::PROB_2_CHILD)) {
+            InstantiateRoom(child, actualRoom, dir);
+            Constants::Direction dir2;
+            do {
+                prob = Constants::Next(3);
+                dir2 = static_cast<Constants::Direction>(prob);
+            } while (dir == dir2);
+            InstantiateRoom(child, actualRoom, dir2);
+        } else {
+            InstantiateRoom(child, actualRoom, Constants::Direction::right);
+            InstantiateRoom(child, actualRoom, Constants::Direction::down);
+            InstantiateRoom(child, actualRoom, Constants::Direction::left);
         }
-            
     }
     
-    nKeys = RoomFactory::AvailableLockId.size() + RoomFactory::UsedLockId.size();
-	nLocks = RoomFactory::UsedLockId.size();
+    nKeys = 0;
+	nLocks = 0;
+    // count avg children
+    CalcAvgChildren();
 }
 
 
@@ -167,10 +156,9 @@ void Dungeon::InstantiateRoom(Room* child, Room* actualRoom, Constants::Directio
 	
 	if (actualRoom->ValidateChild(dir, roomGrid)) {
         
-		Room* newRoom = RoomFactory::CreateRoom();
+		Room* newRoom = new Room(RoomType::normal, -1, -1);
 		child = newRoom;
 		actualRoom->InsertChild(dir, child, roomGrid);
-        //std::cout<< "inserting child [" << actualRoom->X << ", " << actualRoom->Y << "] = " << (actualRoom->Parent == nullptr) << " | " << (actualRoom->leftChild == nullptr) << (actualRoom->bottomChild == nullptr) << (actualRoom->rightChild == nullptr) << std::endl;
 		child->parentDirection = dir;
         toVisit.push(child);
 		roomList.push_back(child);
@@ -270,22 +258,31 @@ void Dungeon::RemoveRoomsRecursive(Room* room){
 
 }
 
-void Dungeon::AddLockAndKey() {
+// It will allways add the quantity  (key and barrier)
+void Dungeon::AddLockAndKey(int quantity) {
 
     Room* actualRoom;
     Room* child;
     actualRoom = roomList[0];
-    std::queue<Room*> toVisit;
-    toVisit.push(actualRoom);
+    std::vector<Room*> toVisit;
+    toVisit.push_back(actualRoom);
     bool hasKey = false;
-    bool hasLock = false;
     int lockId = -1;
-
-    while (!toVisit.empty() && !hasLock) {
+    bool first = true;
+    //
+    if(nKeys >= Constants::nK){
+        return;
+    }
+    // 
+    while (!toVisit.empty() && quantity > 0) {
+        // Will visit the dungeon at "RANDOM", the possible nodes !
+        std::shuffle(toVisit.begin(),toVisit.end(),Constants::randGen);
         actualRoom = toVisit.front();
-        toVisit.pop();
-        if (actualRoom->type == RoomType::normal && actualRoom->Equal(roomList[0]) != true) {
-            if (Constants::Next(101) <= Constants::PROB_KEY_ROOM + Constants::PROB_LOCKER_ROOM) {
+        toVisit.erase(toVisit.begin()); // Remove it !
+        
+        if (actualRoom->type == RoomType::normal && !first) {
+            int chance = Constants::Next(101);
+            if (chance <= Constants::PROB_KEY_ROOM + Constants::PROB_LOCKER_ROOM) {
                 if (!hasKey) {
                     (*actualRoom).type = RoomType::key;
                     (*actualRoom).roomId = Constants::getNextId();
@@ -293,25 +290,29 @@ void Dungeon::AddLockAndKey() {
                     lockId = actualRoom->roomId;
                     hasKey = true;
                     roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                    nKeys++;
                 } else {
                     (*actualRoom).type = RoomType::locked;
                     (*actualRoom).keyToOpen = lockId;
-                    hasLock = true;
+                    hasKey = false; // Get to put another one
                     roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
+                    quantity -= 1;
+                    nLocks++;
                 }
             }
         }
+        first = false;
         child = actualRoom->leftChild;
         if (child != nullptr && actualRoom->Equal(child->Parent)) {
-            toVisit.push(child);
+            toVisit.push_back(child);
         }
         child = actualRoom->bottomChild;
         if (child != nullptr && actualRoom->Equal(child->Parent)) {
-            toVisit.push(child);
+            toVisit.push_back(child);
         }
         child = actualRoom->rightChild;
         if (child != nullptr && actualRoom->Equal(child->Parent)) {
-            toVisit.push(child);
+            toVisit.push_back(child);
         }
     }
 }
@@ -366,9 +367,8 @@ void Dungeon::RemoveLockAndKey() {
                 (*actualRoom).keyToOpen = -1;
                 // Update the grid
                 roomGrid.SetRoom(actualRoom->X, actualRoom->Y, actualRoom);
-                nLocks--;
                 hasLock = false;
-                
+                nLocks--;
             }
 
 
@@ -419,7 +419,195 @@ void Dungeon::FixRoomList() {
             toVisit.push(actualRoom->rightChild);
     }
 }
+// MUTATION FORM
 
+void Dungeon::AddRooms(){
 
+    // Select a random room in the dungeon
+    int cutPosition = Constants::Next(1, roomList.size());
+    Room* actualRoom = roomList[cutPosition];
+    bool roomWasAdded = false;
+    // check if it can add a node in one of the "Child" nodes
+    std::vector<int> options;
+    if( actualRoom->leftChild == nullptr){
+        options.push_back(0);
+    }
+    if( actualRoom->bottomChild == nullptr){
+        options.push_back(1);
+    }
+    if( actualRoom->rightChild == nullptr){
+        options.push_back(2);
+    }
+    while(options.size() > 0){
+        int selectedID = Constants::Next(0,options.size());
+        int selectedElement = options[selectedID];
+        Constants::Direction dir = selectedElement == 0 ? Constants::Direction::left : selectedElement == 1 ? Constants::Direction::down : Constants::Direction::right;
+        options.erase(options.begin() + selectedID);
 
+        // Check if there is aviable space
+        if(actualRoom->ValidateChild(dir, roomGrid)){
+            // std::cout << "ADDED A ROOM !!! " << std::endl;
+            Room* newRoom;
+            InstantiateRoom(newRoom, actualRoom, dir);
+            roomWasAdded = true;
+            break;// Add only 1 ROOM ...
+        }
+    }
+    // IF we fail to add just go on ...
+    
+    // std::cout << "Room was added ??? " << roomWasAdded << std::endl;
+    
+    
+}
 
+void Dungeon::RemoveRooms(){
+    
+    // Leave at least 2 nodes !!!
+    if(roomList.size() <= 2){
+        return;
+    }
+    // Select a random room in the dungeon
+    int cutPosition = Constants::Next(1, roomList.size());
+    Room* actualRoom = roomList[cutPosition];
+    
+    // Search the leaf, then remove !!! (all random)
+    while(actualRoom != nullptr){
+        bool isLeaf = true;
+        std::vector<int> options;
+        if( actualRoom->leftChild != nullptr){
+            options.push_back(0);
+        }
+        if( actualRoom->bottomChild != nullptr){
+            options.push_back(1);
+        }
+        if( actualRoom->rightChild != nullptr){
+            options.push_back(2);
+        }
+        if(options.size() == 0){
+            if(actualRoom->Parent->leftChild != nullptr && actualRoom->Parent->leftChild->X == actualRoom->X && actualRoom->Parent->leftChild->Y == actualRoom->Y){
+                actualRoom->Parent->leftChild = nullptr;
+            }
+            if(actualRoom->Parent->bottomChild != nullptr && actualRoom->Parent->bottomChild->X == actualRoom->X && actualRoom->Parent->bottomChild->Y == actualRoom->Y){
+                actualRoom->Parent->bottomChild = nullptr;
+            }
+            if(actualRoom->Parent->rightChild != nullptr && actualRoom->Parent->rightChild->X == actualRoom->X && actualRoom->Parent->rightChild->Y == actualRoom->Y){
+                actualRoom->Parent->rightChild = nullptr;
+            }
+            // Remove the node from grid
+            roomGrid.SetRoom(actualRoom->X,actualRoom->Y, nullptr);
+            // Remove node from roomList
+            roomList.erase(std::remove_if(roomList.begin(), roomList.end(), [actualRoom](Room* room) {
+                return room->X == actualRoom->X && room->Y == actualRoom->Y;
+            }), roomList.end());
+            
+            delete actualRoom;
+            // std::cout << "REMOVED ROOM !!!" << std::endl;
+            break;
+        }
+        else{
+            int selectedID = Constants::Next(0,options.size());
+            int selectedElement = options[selectedID];
+            actualRoom = selectedElement == 0 ? actualRoom->leftChild  : selectedElement == 1 ? actualRoom->bottomChild : actualRoom->rightChild;
+        }
+    }
+    // We will Get a room and we will remove it yes or yes    
+}
+
+void Dungeon::SymmetricMutation(){
+    
+    // std::cout << "Symetric CHANGE "<< std::endl;
+    // DisplayDungeon();
+    // Need to replae left with eight child
+    std::vector<Room*> toVisit;
+    toVisit.push_back(roomList[0]);
+    
+    // Clean The grid
+    while (!toVisit.empty()) {
+        Room* aux = nullptr;
+        Room* actualRoom = toVisit.front();
+        toVisit.erase(toVisit.begin());
+        // std::cout << "NODE DATA " << actualRoom->X << ", " << actualRoom->Y << "LR " << actualRoom->rotation<< " " << std::endl;
+        if(actualRoom->IsLeafNode() == false){
+            Room* lRoom = actualRoom->leftChild;
+            Room* dRoom = actualRoom->bottomChild;
+            Room* rRoom = actualRoom->rightChild;
+            // remove them from the grid
+            aux = rRoom;
+            if(aux != nullptr){
+                roomGrid.SetRoom(aux->X, aux->Y, nullptr);
+                toVisit.push_back(aux);
+            }
+            aux = dRoom;
+            if(aux != nullptr){
+                
+                roomGrid.SetRoom(aux->X, aux->Y, nullptr);
+                toVisit.push_back(aux);
+            }
+            aux = lRoom;
+            if(aux != nullptr){
+                roomGrid.SetRoom(aux->X, aux->Y, nullptr);
+                toVisit.push_back(aux);
+            }
+        }
+    }
+
+    // std::cout << std::endl;
+    // Start again, but with the roomgrid empty !
+    toVisit.push_back(roomList[0]);
+    while (!toVisit.empty()) {
+        Room* aux = nullptr;
+        Room* actualRoom = toVisit.front();
+        toVisit.erase(toVisit.begin()); // Remove it !
+        
+        if(actualRoom->IsLeafNode() == false){
+            Room* lRoom = actualRoom->leftChild;
+            Room* dRoom = actualRoom->bottomChild;
+            Room* rRoom = actualRoom->rightChild;
+            // Remove them from the parent
+            actualRoom->leftChild = nullptr;
+            actualRoom->bottomChild = nullptr;
+            actualRoom->rightChild = nullptr;
+            // remove them from the grid
+            // std::cout << "Ready to replace " << std::endl;
+            aux = rRoom;
+            if(aux != nullptr){
+                // std::cout << "From Right " << aux->X << ", " << aux->Y  << " rotation " << aux->rotation << std::endl;
+                actualRoom->InsertChild(Constants::Direction::left, aux, roomGrid);
+                aux->parentDirection = Constants::Direction::left;
+                roomGrid.SetRoom(aux->X,aux->Y,aux);
+                toVisit.push_back(aux);
+                // std::cout << "To Left " << aux->X << ", " << aux->Y << " rotation " << aux->rotation<< std::endl;
+            }
+            aux = dRoom;
+            if(aux != nullptr){
+                // std::cout << "From Down  " << aux->X << ", " << aux->Y << " rotation " << aux->rotation<< std::endl;
+                actualRoom->InsertChild(Constants::Direction::down, aux, roomGrid);
+                aux->parentDirection = Constants::Direction::down;
+                roomGrid.SetRoom(aux->X,aux->Y,aux);
+                toVisit.push_back(aux);
+                // std::cout << "To Down  " << aux->X << ", " << aux->Y << " rotation " << aux->rotation<< std::endl;
+            }
+            aux = lRoom;
+            if(aux != nullptr){
+                // std::cout << "From Left  " << aux->X << ", " << aux->Y << " rotation " << aux->rotation<< std::endl;
+                actualRoom->InsertChild(Constants::Direction::right, aux, roomGrid);
+                aux->parentDirection = Constants::Direction::right;
+                roomGrid.SetRoom(aux->X,aux->Y,aux);
+                toVisit.push_back(aux);
+                // std::cout << "To Right  " << aux->X << ", " << aux->Y << " rotation " << aux->rotation<< std::endl;
+            }
+        }
+    }
+    // DisplayDungeon();
+    
+}
+
+void Dungeon::DisplayDungeon(){
+    std::cout << fitness << std::endl;
+
+    for (Room* r : roomList) {
+        std::cout << r->roomId << " [" << r->X << "," << r->Y << " ]" << ((int)r->type) << ": " << r->keyToOpen << std::endl;
+    }
+}
+
+    

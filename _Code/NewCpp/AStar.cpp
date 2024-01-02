@@ -28,7 +28,7 @@ Location::Location(int X,int Y, int F, int G, int H,Location* parent){
     this->Parent = parent;
 }
 
-int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
+int AStar::FindRouteAStar(Dungeon* dun, int matrixOffset) {
 
     // The path through the dungeon
     std::vector<Location*> path;
@@ -284,6 +284,8 @@ int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
         
     }
     
+    dun->finalRoomX = (target->X/2) + minX;
+    dun->finalRoomY = (target->Y/2) + minY;
 
     path.clear(); // Distributed in the Open or closed list
     locksLocation.clear();
@@ -292,10 +294,8 @@ int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
     for (Location& locked : allLocksLocation) {
         if(locked.Parent != nullptr){
             delete locked.Parent;
-        }
-        
+        }   
     }
-    
 
     for (Location* loc : openList){
         loc->Parent = nullptr;
@@ -312,8 +312,6 @@ int AStar::FindRoute(Dungeon* dun, int matrixOffset) {
     closedList.clear();
 
     delete target;
-
-
     return neededLocks;
 }
 

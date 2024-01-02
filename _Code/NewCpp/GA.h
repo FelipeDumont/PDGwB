@@ -12,23 +12,51 @@
 #include <algorithm>
 #include <chrono> // Not used ...
 
+
 class GA {
 public:
     bool testingMode;;
     enum class MutationOp { insertChild, removeLeaf };
-    float Fitness(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixOffset);
-    std::vector<int>  FindNKLR(Room *root, int *nRooms, int *specialCount);
-    std::vector<Dungeon*> CreateDungeon();
-    std::vector<Dungeon> GenerateDungeon();
 
-    void Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2);
+
+    /**********************************************************************/
+    /************************      Helper       ***************************/
+    /**********************************************************************/
     void ChangeChildren(Room* cut1, Room* cut2);
-    void Crossover(Dungeon*& indOriginal1, Dungeon*& indOriginal2);
-    void Mutation(Dungeon* dun);
 
-    // Testing
+
+    /**********************************************************************/
+    /**********************      Fitness       ****************************/
+    /**********************************************************************/
+    float FitnessSymmetry(Dungeon* ind, int nV, int nK, int nL, float lCoef, int matrixOffset, bool useKB, bool final);
+    
+    /**********************************************************************/
+    /********************      Main Evolution      ************************/
+    /**********************************************************************/
+    void Tournament(std::vector<Dungeon*> pop, int &parent1, int &parent2);
+    Dungeon* CreateDungeon();
+
+    /**********************************************************************/
+    /************************      TEST       *****************************/
+    /**********************************************************************/
     void ReadSequence(std::string fileName);
-    void BasicTests();
+
+    /**********************************************************************/
+    /************************      Evolve       ***************************/
+    /**********************************************************************/
+    std::vector<Dungeon*> EvolveForm(std::vector<Dungeon*> dungeons);
+    std::vector<Dungeon*> EvolveBK(std::vector<Dungeon*> dungeons);
+
+    /**********************************************************************/
+    /************************      FORM       *****************************/
+    /**********************************************************************/
+    void CrossoverForm(Dungeon*& indOriginal1, Dungeon*& indOriginal2);
+    void MutationForm(Dungeon* dun);
+
+    /**********************************************************************/
+    /************************      BK       *******************************/
+    /**********************************************************************/
+    void EvolutionBK(Dungeon* dun);
 
 };
 

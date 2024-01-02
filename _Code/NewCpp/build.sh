@@ -3,44 +3,43 @@
 
 clear
 
-
-# Compile with the main file
-# Executable file and then
-# .so Compilation (shared library)
-
-
+# Directly from c++ or in python to visualice it
 if [ "$1" = "0" ]; then
-	echo "Just Build"
-	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb 
+	echo "Just Build and Excecute"
+	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwb
+	# Call example
+	# bash build.sh 0 1010 6 1 1 1.8 1 false no 100 10 0.025 0.025 0.9 0.5 0.025 0.025 0.9 false
+	# bash build.sh 0 1010 6 1 1 1.8 1 true no 100 10 0.025 0.025 0.9 0.5 0.025 0.025 0.9 false
+	time ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
+	#    ./pdgwb Seed nV nK nL Lcoef neededL Testing FileName gen popS mf1 mf2 cf se mbk1 mbk2 cbk
+	#           |_________________________| |______________| |__________________________________|
+	#                      6 variables	  2 variables	    9 Fixed   
+	
+	# valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 elif [ "$1" = "1" ]; then
 	echo "Just Build and Excecute"
-	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb
-	# Arguments =  Gen Deph pop_size nV nK nL lCoef seed testingMode testingBasics useRandomSequence fileName
-	# bash build.sh 1 10 5 4 5 1 1 1.2 10 false false false RandomSequence.txt
-	# bash build.sh 1 10 5 4 5 1 1 1.2 10 false false false RandomSequence.txt
-	valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
-elif [ "$1" = "2" ]; then
-	echo "Just Run"
-	time ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
-elif [ "$1" = "Test" ]; then
-	echo "TESTING ALL INSTANCES !!! First Build!"
-	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb
-	echo "Test 1: ./pdgwb 200 8 8 8 2 2 1.2 10 true false true RandomSequence_200_8_8_8_2_2_1,2.txt"
-	time ./pdgwb 200 8 8 8 2 2 1.2 10 true false true RandomSequence_200_8_8_8_2_2_1,2.txt
-	echo "Test 2: ./pdgwb 200 10 8 12 4 4 1.3 10 true false true RandomSequence_200_10_8_12_4_4_1,3.txt"
-	time ./pdgwb 200 10 8 12 4 4 1.3 10 true false true RandomSequence_200_10_8_12_4_4_1,3.txt
-	echo "Test 3: ./pdgwb 200 10 8 10 1 1 1.4 10 true false true RandomSequence_200_10_8_10_1_1_1,4.txt"
-	time ./pdgwb 200 10 8 10 1 1 1.4 10 true false true RandomSequence_200_10_8_10_1_1_1,4.txt
-	echo "Test 4: ./pdgwb 200 12 10 10 5 5 1.8 10 true false true RandomSequence_200_12_10_10_5_5_1,8.txt"
-	time ./pdgwb 200 12 10 10 5 5 1.8 10 true false true RandomSequence_200_12_10_10_5_5_1,8.txt
-	echo "Test 5: ./pdgwb 200 20 20 10 1 1 1.4 10 true false true RandomSequence_200_20_20_10_1_1_1,4.txt"
-	time ./pdgwb 200 20 20 10 1 1 1.4 10 true false true RandomSequence_200_20_20_10_1_1_1,4.txt
+	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwb
+	# Call example
+	# bash build.sh 0 1010 6 1 1 1.8 1 false no 100 10 0.025 0.025 0.9 0.5 0.025 0.025 0.9
+	# bash build.sh 0 1010 6 1 1 1.8 1 true no 100 10 0.025 0.025 0.9 0.5 0.025 0.025 0.9
+	valgrind --leak-check=full  ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
+	#    			    ./pdgwb Seed nV nK nL Lcoef neededL Testing FileName gen popS mf1 mf2 cf se mbk1 mbk2 cbk
+	#                            	   |_________________________| |______________| |__________________________________|
+	#                               	6 variables	  	2 variables	    9 Fixed  
 	
-else
-	echo "Just Build DLL and SO"
-	g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.so
-	g++ -shared -fPIC main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp RoomFactory.cpp -o pdgwb.dll
-fi
+	# valgrind --leak-check=full ./pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 
+else
+	echo "Build pdgwbSO run in python (colab hates .so for some reason)"
+	g++ -fPIC -O3 -shared main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwbSO
+	# Call example
+	# bash build.sh python 1010 6 1 1 1.8 1 false no 262 34 0.8528 0.674 0.7703 0.6575 0.4407 0.0457 0.0088 false
+	# bash build.sh python 1010 6 1 1 1.8 1 true no 262 34 0.8528 0.674 0.7703 0.6575 0.4407 0.0457 0.0088 false
+	time python3 TestDungeons.py $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
+	#    python3 TestDungeons.py Seed nV nK nL Lcoef neededL Testing FileName gen popS mf1 mf2 cf se mbk1 mbk2 cbk  DisplayDungeon
+	#                           |_________________________| |______________| |__________________________________|	true/false
+	#                           	6 variables	  	2 variables	    9 Fixed  				LAST
+
+fi
 
 

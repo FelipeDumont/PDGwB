@@ -68,6 +68,10 @@ namespace LevelGenerator
                 int counter = 0;
                 foreach (Dungeon dun in dungeons)
                 {
+                    
+                    dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                    // Debug.Log("Dungeon " + counter + " F: " + dun.fitness);
+                    /*
                     string data = "";
                     foreach (Room r in dun.RoomList)
                     {
@@ -75,13 +79,7 @@ namespace LevelGenerator
                     }
                     Debug.Log("Dungeon " + counter);
                     Debug.Log(data);
-
-                    dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                    Debug.Log("Dungeon " + counter + " F: " + dun.fitness);
-                    
-                    
-                   
-                    
+                    */
                     counter++;
                 }
 
@@ -101,8 +99,6 @@ namespace LevelGenerator
                     }
                 }
 
-                // Debug.Log("Best individual Fitness: " + aux.fitness);
-
 
                 //Create the child population by doing the crossover and mutation
                 List<Dungeon> childPop = new List<Dungeon>(dungeons.Count);
@@ -112,7 +108,6 @@ namespace LevelGenerator
                     
                     int parentIdx1 = 0, parentIdx2 = 1;
                     GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2);
-                    // Debug.Log(parentIdx1 + " | " + parentIdx2);
                     
                     Dungeon parent1 = dungeons[parentIdx1].Copy();
                     Dungeon parent2 = dungeons[parentIdx2].Copy();
@@ -120,25 +115,12 @@ namespace LevelGenerator
                     
                     try
                     {
-                        // Debug.Log("Cross: " + parentIdx1 + " | " + parentIdx2 + "   " + Util.randomSequence.Count);
                         GA.Crossover(ref parent1, ref parent2);
-                        // Debug.Log("Post Cross seedID?" + Util.randomSequence.Count);
-
-                        // Debug.Log("End Cross: " + Util.randomSequence.Count);
-
-                        
                         GA.Mutation(ref parent1);
-                        // Debug.Log("END Mutation 1: " + Util.randomSequence.Count);
                         GA.Mutation(ref parent2);
-                        // Debug.Log("END Mutation 2 " + Util.randomSequence.Count);
                         
-
-
-                        //We need to fix the room list anytime a room is altered in the tree.
                         parent1.FixRoomList();
                         parent2.FixRoomList();
-                        
-
                     }
                     catch (System.Exception e)
                     {
@@ -155,31 +137,28 @@ namespace LevelGenerator
                     childPop.Add(parent2);
                     
                 }
-
-                // Debug.Log("Add Again AUX " + aux.fitness );
                 childPop[0] = aux;
                 dungeons = childPop;
-                // Debug.Log("Next Generation: " + (gen + 1));
             }
             //Find the best individual in the final population and print it as the answer
             min = float.MaxValue;
             aux = dungeons[0];
 
-            Debug.Log("Final generation: ");
+            // Debug.Log("Final generation: ");
             foreach (Dungeon dun in dungeons)
             {
+                
+                
+                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
+                /*
+                Debug.Log(dun.fitness);
                 string data = "";
                 foreach (Room r in dun.RoomList)
                 {
                     data += r.RoomId + " [" + r.X + ", " + r.Y + "]" + r.KeyToOpen + "\n";
                 }
                 Debug.Log("Dungeon " + data);
-                dun.fitness = gaObj.Fitness(dun, Constants.nV, Constants.nK, Constants.nL, Constants.lCoef, matrixOffset);
-                
-                Debug.Log(dun.fitness);
-                
-                
-
+                */
                 fitnessValues.Add(dun.fitness);
 
                 if (min > actual)

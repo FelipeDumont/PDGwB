@@ -179,7 +179,7 @@ bool Room::ValidateChild(Constants::Direction dir, RoomGrid roomGrid) {
                 Y = this->Y;
             }
             // Check if the room is in the grid. If not, return true; otherwise, return false
-            roomInGrid = roomGrid.GetRoom(X,Y); // Assuming GetRoom method is available in RoomGrid class
+            roomInGrid = roomGrid.GetRoom(X,Y);
             if (roomInGrid == nullptr) {
                 return true;
             } else {
@@ -270,6 +270,9 @@ void Room::InsertChild(Constants::Direction dir, Room* child, RoomGrid roomGrid)
                 this->rightChild = child;
                 this->rightChild->SetParent(this);
             }
+            else{
+                std::cout << "room IN Grid" << std::endl;
+            }
             break;
         case Constants::Direction::down:
             // Calculate the X and Y based on the parent's rotation
@@ -290,9 +293,12 @@ void Room::InsertChild(Constants::Direction dir, Room* child, RoomGrid roomGrid)
             }
             roomInGrid = roomGrid.GetRoom(child->X,child->Y);
             if (roomInGrid == nullptr) {
-                child->rotation = (this->rotation + 90) % 360;
+                child->rotation = (this->rotation) % 360;
                 this->bottomChild = child;
                 this->bottomChild->SetParent(this);
+            }
+            else{
+                std::cout << "room IN Grid" << std::endl;
             }
             break;
         case Constants::Direction::left:
@@ -314,17 +320,21 @@ void Room::InsertChild(Constants::Direction dir, Room* child, RoomGrid roomGrid)
             }
             roomInGrid = roomGrid.GetRoom(child->X,child->Y);
             if (roomInGrid == nullptr) {
-                child->rotation = (this->rotation + 90) % 360;
+                child->rotation = (this->rotation + 270) % 360;
                 this->leftChild = child;
                 this->leftChild->SetParent(this);
             }
+            else{
+                std::cout << "room IN Grid" << std::endl;
+            }   
             break;
         default:
             //std::cout << "Something went wrong Creating a Child!\n";
             //std::cout << "Direction not supported:\n\tOnly Right, Down, and Left are allowed.\n\n";
             break;
     }
-}    
+}
+
 void Room::SetParent(Room* parent) {
 	this->Parent = parent;
 	if (parent != nullptr) {

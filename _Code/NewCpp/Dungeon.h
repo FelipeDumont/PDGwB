@@ -4,7 +4,7 @@
 #include "Room.h"
 #include <vector>
 #include <queue>
-
+#include <iostream>
 class Dungeon;
 
 class Dungeon {
@@ -16,6 +16,8 @@ public:
     std::queue<Room*> toVisit;
     std::vector<Room*> roomList;
     RoomGrid roomGrid;
+    int finalRoomX = 0;
+    int finalRoomY = 0;
     float fitness;
     
     Dungeon();
@@ -39,9 +41,17 @@ public:
     
     void FixRoomList();
 
-    void AddLockAndKey();
-
+    void DisplayDungeon();
+    
+    // Mutation
+    void AddLockAndKey(int quantity);
     void RemoveLockAndKey();
+
+    // Mutation
+    void AddRooms();
+    void RemoveRooms();
+    void SymmetricMutation();
+    
 
 };
 
