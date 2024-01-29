@@ -38,6 +38,7 @@
 [Bb]uild
 /[Bb]uilds/
 /[Ll]ibrary/
+OriginalCode&Translation/[Ll]ibrary/
 sysinfo.txt
 *.stackdump
 /Assets/AssetStoreTools*

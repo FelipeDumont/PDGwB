@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cd iraceSint
-
-/"$IRACE_HOME"/irace >> salidaSint
-
-cd ..

@@ -1,0 +1,8 @@
+15_3_2_2.0_2.0;room;15.0;0.0;keys;3.0;0.0;barriers;2.0;0.0;lcoef;1.54;0.19;nLocks;0.0;0.0;lastFitness;0.92;0.39;runTime;4.95;0.36;
+20_4_4_1.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.46;0.15;nLocks;0.0;0.0;lastFitness;0.94;0.29;runTime;5.83;0.3;
+20_4_4_2.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.54;0.14;nLocks;0.0;0.0;lastFitness;0.94;0.28;runTime;6.55;0.5;
+25_8_8_1.0_8.0;room;25.0;0.0;keys;8.0;0.0;barriers;7.99;0.1;lcoef;1.5;0.14;nLocks;0.0;0.0;lastFitness;1.08;0.44;runTime;7.0;0.38;
+30_4_4_2.0_4.0;room;30.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.62;0.12;nLocks;0.0;0.0;lastFitness;0.85;0.3;runTime;7.27;0.48;
+30_6_6_1.5_6.0;room;30.0;0.0;keys;6.0;0.0;barriers;5.99;0.1;lcoef;1.52;0.05;nLocks;0.0;0.0;lastFitness;0.11;0.22;runTime;6.97;0.36;
+100_20_20_1.5_20.0;room;100.01;0.1;keys;21.19;0.91;barriers;18.56;1.51;lcoef;1.43;0.04;nLocks;0.0;0.0;lastFitness;6.35;3.14;runTime;20.73;0.74;
+500_100_100_1.5_100.0;room;499.92;1.13;keys;15.08;3.95;barriers;13.11;3.13;lcoef;1.39;0.06;nLocks;0.0;0.0;lastFitness;359.87;19.5;runTime;151.11;17.34;

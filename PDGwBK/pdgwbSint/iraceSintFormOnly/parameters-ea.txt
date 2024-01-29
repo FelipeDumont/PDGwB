@@ -1,0 +1,8 @@
+### Parameter file for the EA
+# name       	switch           type values               [conditions (using R syntax)]
+genF		"-genF  "        i    (10, 200)
+pops		"-pops  "        i    (4, 100)
+mf1		"-mf1  "         r    (0.000, 1.0)
+mf2		"-mf2  "         r    (0.000, 1.0)
+cf          	"-cf  "        	 r    (0.000, 1.0)
+se          	"-se  "        	 r    (0.000, 1.0)

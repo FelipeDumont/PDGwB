@@ -1,0 +1,31 @@
+All this ways to run the program and analisis uses the build.sh bash file, for more information of how it works you can consult to that document
+
+Run a Single map in c (example)
+bash build.sh 0 1010 15 3 2 2.0 2 false no 180 100 50 0.495 0.722 0.734 0.5 0.700 0.300 false
+
+Run Valgrind in a Single map in c (example)
+bash build.sh 1 1010 15 3 2 2.0 2 false no 180 100 50 0.495 0.722 0.734 0.5 0.700 0.300 false
+
+Run a Single map with VISUALIZATION in python:
+bash build.sh 2 1010 15 3 2 2.0 2 false no 180 100 50 0.495 0.722 0.734 0.5 0.700 0.300 true
+
+Run the sintonization:
+
+
+Run with the Analisis:
+bash build.sh Analisis 1011 15 3 2 2.0 2 false no 180 100 50 0.494 0.722 0.734 0.5 0.700 0.3000 false 0 1 0
+
+
+What are we passing to the build.sh ?
+
+
+#	    1010 15  3 2  2.0    2 	false   no 	 180     100   50   0.495 0.722 0.734 0.5 0.700 0.300 	false			
+#           Seed nV nK nL Lcoef neededL Testing FileName genForm genBK popS mf1   mf2   cf    se  mbk1  mbk2    Create Dungeon (python)
+#           |_________________________| |______________| |__________________________________________________||________________________|
+# 	        6 parameters (problem) 	 2 variables	    			9 Fixed				       1 fixed
+
+Want to create the boxplot, wilcoxon test or the results table ?
+
+python3 AnalisisLatexTable.py Results
+python3 AnalisisBoxplot.py Results
+python3 AnalisisWilcoxon.py Result
