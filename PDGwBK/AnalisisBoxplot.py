@@ -16,8 +16,8 @@ import sys
 # Open 2 folders and make the wilcoxon analisis Analisis_GANOSE and Analisis_GAOR
 # Open the files and acquire the resultant fitness
 folder = sys.argv[1]
-gafile = open(folder+"/LCoefTest-NoText/Analisis_GASE//RawFitness.txt")
-originalfile = open(folder+"/LCoefTest-NoText/Analisis_GAOR_NODFS/RawFitness.txt")
+gafile = open(folder+"/LCeofTest/Analisis_GASE/RawFitness.txt")
+originalfile = open(folder+"/LCeofTest/Analisis_GAOR_NODFS/RawFitness.txt")
 
 finalDataGA = {}
 finalDataOr = {}
@@ -40,7 +40,7 @@ gafile.close()
 originalfile.close()
 
 reorganicedData = []
-for key in finalDataOr:
+for key in finalDataGA:
     reorganicedData.append([finalDataOr[key], finalDataGA[key]])
 
 
@@ -56,14 +56,14 @@ bplot1 = ax1.boxplot(reorganicedData[0],
 # ax1.set_title('Rectangular box plot')
 
 # notch shape box plot
-bplot2 = ax2.boxplot(reorganicedData[2],
+bplot2 = ax2.boxplot(reorganicedData[1],
                      vert=True,  # vertical box alignment
                      patch_artist=True,  # fill with color
                      labels=labels)  # will be used to label x-ticks
 # ax2.set_title('Notched box plot')
 
 # rectangular box plot
-bplot3 = ax3.boxplot(reorganicedData[4],
+bplot3 = ax3.boxplot(reorganicedData[2],
                      vert=True,  # vertical box alignment
                      patch_artist=True,  # fill with color
                      labels=labels)  # will be used to label x-ticks

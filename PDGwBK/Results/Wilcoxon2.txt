@@ -1,0 +1,16 @@
+\begin{figure}[h] 
+\begin{center} 
+\begin{tabular}{|l|l|} 
+\hline 
+Problem & Wilcoxon p value\\ \hline  
+(15,3,2,2.0,2.0) & \textbf{ 7.7834e-18 }\\ \hline  
+(20,4,4,1.0,4.0) & \textbf{ 5.8892e-19 }\\ \hline  
+(20,4,4,2.0,4.0) & \textbf{ 5.3492e-18 }\\ \hline  
+(25,8,8,1.0,8.0) & \textbf{ 2.9069e-10 }\\ \hline  
+(30,4,4,2.0,4.0) & 6.5911e-01\\ \hline  
+(30,6,6,1.5,6.0) & 1.0000e+00\\ \hline  
+(100,20,20,1.5,20.0) & \textbf{ 2.4416e-17 }\\ \hline  
+(500,100,100,1.5,100.0) & \textbf{ 1.0080e-18 }\\ \hline  
+\end{tabular} 
+\end{center} 
+\end{figure} 

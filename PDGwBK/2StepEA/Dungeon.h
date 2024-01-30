@@ -29,6 +29,8 @@ public:
     void CleanDungeon();
 
     void CalcAvgChildren();
+    void CalcAvgChildrenADD(int* totalChildCount, int * aviableRooms);
+    
     void CalculateSymmetry();
 
     void InstantiateRoom(Room* child, Room* actualRoom, Constants::Direction dir);

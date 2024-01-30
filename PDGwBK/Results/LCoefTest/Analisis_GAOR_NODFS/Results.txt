@@ -1,5 +1,0 @@
-20_4_4_1.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.12;0.11;nLocks;0.0;0.0;lastFitness;0.25;0.23;runTime;4.71;0.49;
-20_4_4_1.5_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.46;0.02;nLocks;0.0;0.0;lastFitness;0.08;0.01;runTime;4.01;0.2;
-20_4_4_2.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.66;0.11;nLocks;0.0;0.0;lastFitness;0.68;0.23;runTime;4.15;0.29;
-20_4_4_2.5_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.67;0.15;nLocks;0.0;0.0;lastFitness;1.66;0.3;runTime;4.05;0.29;
-20_4_4_3.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.67;0.15;nLocks;0.0;0.0;lastFitness;2.66;0.3;runTime;4.04;0.28;

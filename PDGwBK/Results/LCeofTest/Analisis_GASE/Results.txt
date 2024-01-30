@@ -1,0 +1,3 @@
+20_4_4_1.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.01;0.03;nLocks;4.0;0.0;lastFitness;0.02;0.05;runTime;4.41;0.21;
+20_4_4_2.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;1.89;0.03;nLocks;4.0;0.0;lastFitness;0.21;0.07;runTime;3.46;0.16;
+20_4_4_3.0_4.0;room;20.0;0.0;keys;4.0;0.0;barriers;4.0;0.0;lcoef;2.54;0.3;nLocks;4.0;0.0;lastFitness;0.92;0.61;runTime;3.46;0.26;

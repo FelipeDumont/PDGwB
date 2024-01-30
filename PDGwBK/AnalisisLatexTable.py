@@ -26,13 +26,6 @@ def GenerateTable(lines, col):
 ###############################################################################################
 import os
 
-'''
-mainFolders = ["Results"]
-actualMainFolders = []
-for folder_path in mainFolders:
-    if os.path.exists(folder_path):
-        actualMainFolders.append(folder_path)
-'''
 actualMainFolders = []
 actualMainFolders.append(sys.argv[1])
 current = actualMainFolders[0]

@@ -10,8 +10,7 @@ if [ "$1" = "0" ]; then
 	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwb
 	cd ..
 	# Call example
-	# bash build.sh 0 1010 15 3 2 2.0 2 false no 180 100 0.50 0.495 0.722 0.734 0.5 0.700 0.300 false
-	# bash build.sh 0 1010 15 3 2 2.0 2 true no 180 100 0.50 0.495 0.722 0.734 0.5 0.700 0.300 false
+	# bash build.sh 0 1010 15 3 2 2.0 2 false no 180 100 60 0.838 0.848 0.826 0.271 0.700 0.300 false
 	time ./2StepEA/pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
 	#    ./pdgwb Seed nV nK nL Lcoef neededL Testing FileName genForm genBK popS mf1 mf2 cf se mbk1 mbk2
 	#           |_________________________| |______________| |__________________________________________|
@@ -24,7 +23,7 @@ elif [ "$1" = "1" ]; then
 	g++ -fPIC -O3 main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwb
 	cd ..
 	# Call example
-	# bash build.sh 1 1010 15 3 2 2.0 2 false no 180 100 0.50 0.495 0.722 0.734 0.5 0.700 0.300 false
+	# bash build.sh 1 1010 15 3 2 2.0 2 false no 180 100 60 0.838 0.848 0.826 0.271 0.700 0.300 false
 	valgrind --leak-check=full -s ./2StepEA/pdgwb $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
 	#    						./pdgwb Seed nV nK nL Lcoef neededL Testing FileName genForm genBK popS mf1 mf2 cf se mbk1 mbk2
 	#    						       |_________________________| |______________| |__________________________________________|
@@ -38,8 +37,8 @@ elif [ "$1" = "2" ]; then
 	g++ -fPIC -O3 -shared main.cpp GA.cpp Dungeon.cpp AStar.cpp Constants.cpp Room.cpp -o pdgwbSO
 	cd ..
 	# Call example
-	# bash build.sh 2 1010 15 3 2 2.0 2 false no 180 100 0.50 0.495 0.722 0.734 0.5 0.700 0.300 false
-	# bash build.sh 2 1010 15 3 2 2.0 2 false no 180 100 0.50 0.495 0.722 0.734 0.5 0.700 0.300 true
+	# bash build.sh 2 1010 15 3 2 2.0 2 false no 180 100 60 0.838 0.848 0.826 0.271 0.700 0.300 false
+	# bash build.sh 2 1010 15 3 2 2.0 2 false no 180 100 60 0.838 0.848 0.826 0.271 0.700 0.300 true
 	time python3 2StepEA/TestDungeons.py $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}
 	
 	#    python3 TestDungeons.py Seed nV nK nL Lcoef neededL Testing FileName genForm genBK popS mf1 mf2 cf se mbk1 mbk2  DisplayDungeon
@@ -48,7 +47,7 @@ elif [ "$1" = "2" ]; then
 
 elif [ "$1" = "Analisis" ]; then
 	# Call Example
-	# bash build.sh Analisis 1011 15 3 2 2.0 2 false Analisis 134 100 49 0.3522 0.3062 0.3295 0.2974 0.700 0.3000 true NewResults
+	# bash build.sh Analisis 1010 15 3 2 2.0 2 false no 180 100 60 0.838 0.848 0.826 0.271 0.700 0.300 false NewResults
 	# The problem settings will be ignored, so you can use "Almost" the same line to run trh eproyect
 	
 	# If there are enough arguments add all the results to that folder
@@ -65,12 +64,12 @@ elif [ "$1" = "Analisis" ]; then
 	defaultFolder="Analisis"
 	
 	# Number of analisis for each problem
-	N=2
+	N=100
 	
 	# To understand each problem
 	# #Room, #Keys, #Barriers, LCoeficient, #NeededLocks (<=Locks)
 	problems=("15 3 2 2.0 2"  "20 4 4 1.0 4" "20 4 4 2.0 4" "25 8 8 1.0 8" "30 4 4 2.0 4" "30 6 6 1.5 6" "100 20 20 1.5 20" "500 100 100 1.5 100")
-	# problems=("20 4 4 1.0 4" "20 4 4 1.5 4" "20 4 4 2.0 4" "20 4 4 2.5 4" "20 4 4 3.0 4")
+	# problems=("20 4 4 3.0 4")
 
 
 	problems_length=${#problems[@]}
@@ -111,9 +110,10 @@ elif [ "$1" = "Analisis" ]; then
 		problem="${problems[p]}"
 		echo "Current Problem [" $problem "] " $currentFolder
 		# echo "python3 Analisis.py $2 $problem $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}"
-		python3 Analisis.py $2 $problem $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} 0 $currentFolder $N ${20} ${21} ${22}
+		python3 Analisis.py $2 $problem $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} 0 $currentFolder $N
 	done
 	
+	: '
 	# Do the analisis on the originaal version of the problem without the DFS (indicated on the "3" value)
 	currentFolder="Analisis_GAOR_NODFS"
 	# Create the folder for the current analisis
@@ -125,6 +125,7 @@ elif [ "$1" = "Analisis" ]; then
 		# echo "python3 Analisis.py $2 $problem $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}"
 		python3 Analisis.py $2 $problem $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} 3 $currentFolder $N ${20} ${21} ${22}
 	done
+	'
 	
 	date +"%D %T" 
 else

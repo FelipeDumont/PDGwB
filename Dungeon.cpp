@@ -105,26 +105,6 @@ void Dungeon::CalcAvgChildren() {
     avgChildren = avgChildren / (roomList.size() - childLess);
 }
 
-void Dungeon::CalcAvgChildrenADD(int* totalChildCount, int * aviableRooms) {
-    *totalChildCount = 0;
-    int childCount;
-    int childLess = 0;
-    for (Room* room : roomList) {
-        childCount = 0;
-        if (room->rightChild != nullptr && room->rightChild->Parent != nullptr)
-            childCount += 1;
-        if (room->leftChild != nullptr && room->leftChild->Parent != nullptr)
-            childCount += 1;
-        if (room->bottomChild != nullptr && room->bottomChild->Parent != nullptr)
-            childCount += 1;
-        if (childCount == 0)
-            childLess++;
-        *totalChildCount += childCount;
-    }
-    *aviableRooms = 0;
-    *aviableRooms += (roomList.size() - childLess);
-}
-
 void Dungeon::GenerateRooms() {
 
     int prob;
@@ -462,17 +442,6 @@ void Dungeon::FixRoomList() {
 // MUTATION FORM
 void Dungeon::AddRooms(){
 
-    if(roomList.size() >= Constants::nV){
-        return;
-    }
-    int totalChildCount;
-    int aviableRooms;
-
-    // if add a new room to the dungeon the formula will be = (totalChildcount + 1) / (aviableRooms + 1)
-    // In the case the room already has other son rooms = (totalChildCount + 1) / aviableRooms
-    CalcAvgChildrenADD(&totalChildCount, &aviableRooms); 
-    float oldLcoef = (float)totalChildCount/ aviableRooms;
-    // std::cout << "old LCoef " << totalChildCount << " / " << aviableRooms << " = " << oldLcoef << std::endl;
     // Select a random room in the dungeon
     int cutPosition = Constants::Next(1, roomList.size());
     Room* actualRoom = roomList[cutPosition];
@@ -489,20 +458,7 @@ void Dungeon::AddRooms(){
         if( actualRoom->rightChild == nullptr){
             options.push_back(2);
         }
-        //if(options.size() <= Constants::lCoef){
-        int roomSons = 3 - options.size();
-            float newLCoef = 0;
-        if(roomSons == 0){
-            newLCoef = (float)(totalChildCount + 1) / (aviableRooms + 1);
-        }
-        else{
-            newLCoef = (float)(totalChildCount + 1) / aviableRooms;
-        }
-        
-        // std::cout << std::abs(newLCoef-Constants::lCoef)  << " VS " <<  std::abs(oldLcoef-Constants::lCoef) << std::endl;
-        // in case the lcoef its mantained for cases of linearity = 1.0
-        if(std::abs(newLCoef-Constants::lCoef) <=  std::abs(oldLcoef-Constants::lCoef)){
-
+        if(options.size() <= Constants::lCoef){
             while(options.size() > 0){
                 int selectedID = Constants::Next(0,options.size());
                 int selectedElement = options[selectedID];
@@ -512,8 +468,6 @@ void Dungeon::AddRooms(){
                 // Check if there is aviable space
                 if(actualRoom->ValidateChild(dir, roomGrid)){
                     // std::cout << "ADDED A ROOM !!! " << std::endl;
-                    
-                
                     Room* newRoom;
                     InstantiateRoom(newRoom, actualRoom, dir);
                     roomWasAdded = true;
@@ -550,9 +504,6 @@ void Dungeon::AddRooms(){
 
 void Dungeon::RemoveRooms(){
     
-    if(roomList.size() <= Constants::nV){
-        return;
-    }
     // Leave at least 2 nodes !!!
     if(roomList.size() <= 2){
         return;
